@@ -9,17 +9,12 @@ namespace Markdown.MarkdownEnumerable
             
         }
 
-        public TextType GetNextTag()
+        public Tag GetNextTag()
         {
             throw new NotImplementedException();
         }
 
         public char GetNextChar()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IMarkdownEnumerable GetCopy()
         {
             throw new NotImplementedException();
         }
