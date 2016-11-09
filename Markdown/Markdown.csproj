@@ -47,12 +47,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Md.cs" />
+    <Compile Include="CharParsers\DoubleUnderscoreParser.cs" />
+    <Compile Include="CharParsers\EscapeParser.cs" />
+    <Compile Include="CharParsers\ICharParser.cs" />
+    <Compile Include="IMarkdownContainer.cs" />
+    <Compile Include="StringMarkdownContainer.cs" />
+    <Compile Include="MarkdownRenderer.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="CharParsers\UnderscoreParser.cs" />
+    <Compile Include="TagsUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+    <None Include="Spec.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

@@ -1,25 +1,36 @@
 ﻿using System;
-using Markdown.CharParsers;
+using Markdown.MarkdownEnumerable;
 using NUnit.Framework;
 
 namespace Markdown
 {
 	public class MarkdownRenderer
 	{
-	    public readonly string Markdown;
+	    private readonly IMarkdownEnumerable markdown;
+
+	    public MarkdownRenderer(IMarkdownEnumerable markdown)
+	    {
+	        this.markdown = markdown;
+	    }
 
 	    public MarkdownRenderer(string markdown)
 	    {
-	        Markdown = markdown;
+	        
 	    }
 
 		public string RenderToHtml()
 		{
-			return Markdown; //TODO
+		    throw new NotImplementedException();
 		}
 
-	    private string RenderToHtml(ICharParser parser, int startPosition, out int positionAfterLastRendered)
-	    {
+        /// <summary>
+        /// Recursive method
+        /// <param name="curTag">Last tag we are inside</param>
+        /// </summary>
+	    private string RenderToHtml(Tag curTag)
+	    { 
+            // here switch for curTag
+            // for parsing use MarkdownParsingExtentions.ParseUntil
 	        throw new NotImplementedException();
 	    }
     }
