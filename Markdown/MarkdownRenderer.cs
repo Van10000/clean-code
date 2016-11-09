@@ -1,5 +1,6 @@
 ﻿using System;
 using Markdown.MarkdownEnumerable;
+using Markdown.TagsRepresentation;
 using NUnit.Framework;
 
 namespace Markdown
@@ -31,8 +32,8 @@ namespace Markdown
         /// </summary>
 	    private string Render(Tag curTag, ITagsRepresentation tagsRepresentation)
 	    { 
-            // here switch for curTag
-            // for parsing use MarkdownParsingExtentions.ParseUntil
+            // here will be a switch on curTag
+            // for parsing we will use MarkdownParsingExtentions.ParseUntil
 	        throw new NotImplementedException();
 	    }
     }
