@@ -47,15 +47,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CharParsers\DoubleUnderscoreParser.cs" />
-    <Compile Include="CharParsers\EscapeParser.cs" />
-    <Compile Include="CharParsers\ICharParser.cs" />
-    <Compile Include="IMarkdownContainer.cs" />
-    <Compile Include="StringMarkdownContainer.cs" />
+    <Compile Include="TagsRepresentation\ITagsRepresentation.cs" />
+    <Compile Include="MarkdownEnumerable\IMarkdownEnumerable.cs" />
+    <Compile Include="MarkdownEnumerable\ParsingPrimitives.cs" />
+    <Compile Include="MarkdownEnumerable\StringMarkdownEnumerable.cs" />
+    <Compile Include="MarkdownParsingExtentions.cs" />
     <Compile Include="MarkdownRenderer.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="CharParsers\UnderscoreParser.cs" />
-    <Compile Include="TagsUtils.cs" />
+    <Compile Include="TagsRepresentation\HtmlTagsRepresentation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
