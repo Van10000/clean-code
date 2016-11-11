@@ -9,7 +9,12 @@ namespace Markdown.MarkdownEnumerable
             
         }
 
-        public Tag GetNextTag()
+        public Tag GetNextOpeningTag()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Tag GetNextClosingTag()
         {
             throw new NotImplementedException();
         }

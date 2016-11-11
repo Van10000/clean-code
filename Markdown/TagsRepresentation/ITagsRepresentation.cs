@@ -2,7 +2,7 @@
 
 namespace Markdown.TagsRepresentation
 {
-    interface ITagsRepresentation
+    internal interface ITagsRepresentation
     {
         string GetOpeningTag(Tag tag);
 

@@ -3,12 +3,17 @@
     public interface IMarkdownEnumerable
     {
         /// <summary>
-        /// Returns tag starting from next position, or Tag.None if there's no tag starting there.
+        /// Returns opening tag starting from next position, or Tag.None if there's no tag starting there.
         /// </summary>
-        Tag GetNextTag();
+        Tag GetNextOpeningTag();
+
+        /// <summary>
+        /// Returns closing tag starting from next position, or Tag.None if there's no tag starting there.
+        /// </summary>
+        Tag GetNextClosingTag();
         
         /// <summary>
-        /// Returns next char in enumerable and enumerates to next position.
+        /// Returns next char in enumerable and enumerates to the next position.
         /// </summary>
         char GetNextChar();
 

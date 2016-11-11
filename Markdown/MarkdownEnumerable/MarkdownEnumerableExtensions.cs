@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Markdown.MarkdownEnumerable
 {
-    internal static class MarkdownEnumerableExtnetions
+    internal static class MarkdownEnumerableExtensions
     {
         public static void SkipNextTag(this IMarkdownEnumerable markdown)
         {

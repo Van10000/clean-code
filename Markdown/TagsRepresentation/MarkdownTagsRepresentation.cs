@@ -1,18 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Markdown.MarkdownEnumerable;
 
 namespace Markdown.TagsRepresentation
 {
-    internal class HtmlTagsRepresentation : ITagsRepresentation
+    internal class MarkdownTagsRepresentation : ITagsRepresentation
     {
         public string GetOpeningTag(Tag tag)
         {
             switch (tag)
             {
-                case Tag.Italic:
-                    return "<em>";
                 case Tag.Strong:
-                    return "<strong>";
+                    return "__";
+                case Tag.Italic:
+                    return "_";
                 case Tag.None:
                     return "";
                 default:
@@ -22,10 +26,7 @@ namespace Markdown.TagsRepresentation
 
         public string GetClosingTag(Tag tag)
         {
-            if (tag == Tag.None)
-                return "";
-            var openingTag = GetOpeningTag(tag);
-            return openingTag.Insert(1, "/");
+            return GetOpeningTag(tag);
         }
     }
 }
