@@ -62,17 +62,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MarkdownEnumerable\TagInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MarkdownEnumerable\MarkdownEnumerableExtensions.cs" />
     <Compile Include="TagsRepresentation\ITagsRepresentation.cs" />
     <Compile Include="MarkdownEnumerable\IMarkdownEnumerable.cs" />
     <Compile Include="MarkdownEnumerable\MarkdownParsingPrimitives.cs" />
     <Compile Include="MarkdownEnumerable\StringMarkdownEnumerable.cs" />
-    <Compile Include="MarkdownParsingExtentions.cs" />
     <Compile Include="MarkdownRenderer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="TagsRepresentation\HtmlTagsRepresentation.cs" />
-    <Compile Include="TagsRepresentation\MarkdownTagsRepresentation.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
