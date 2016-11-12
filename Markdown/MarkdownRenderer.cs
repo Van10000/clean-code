@@ -48,7 +48,7 @@ namespace Markdown
 	            if (ShouldCloseTag(stoppedAt.TagType))
 	                return resultBuilder.ToString();
                 var renderedInsideTag = Render(stoppedAt.Tag, tagsRepresentation);
-                resultBuilder.Append(WrapIntoTag(renderedInsideTag, stoppedAt.Tag, tagsRepresentation));
+                WrapIntoTag(resultBuilder, renderedInsideTag, stoppedAt.Tag, tagsRepresentation));
             }
 	    }
 
@@ -57,13 +57,11 @@ namespace Markdown
 	        return tagType == TagType.Closing || tagType == TagType.None; // none if markdown finished
 	    }
 
-        private string WrapIntoTag(string str, Tag tag, ITagsRepresentation representation)
+        private void WrapIntoTag(StringBuilder builderToAddResult, string str, Tag tag, ITagsRepresentation representation)
         {
-            var result = new StringBuilder();
-            result.Append(representation.GetOpeningTag(tag));
-            result.Append(str);
-            result.Append(representation.GetClosingTag(tag));
-            return result.ToString();
+            builderToAddResult.Append(representation.GetOpeningTag(tag));
+            builderToAddResult.Append(str);
+            builderToAddResult.Append(representation.GetClosingTag(tag));
         }
     }
 

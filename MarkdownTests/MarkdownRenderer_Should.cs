@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using System;
+using System.Text;
+using FluentAssertions;
 using Markdown;
 using NUnit.Framework;
 
@@ -26,6 +28,42 @@ namespace MarkdownTests
             var htmlResult = renderer.RenderToHtml();
 
             htmlResult.Should().Be(expectedHtmlResult);
+        }
+
+        [Test, Timeout(1000)]
+        public void RandomSpeedTest()
+        {
+            var charsCount = (int)1e5;
+            var random = new Random(0);
+            var markdownBuilder = new StringBuilder(charsCount + 1);
+
+            for (int i = 0; i < charsCount; ++i)
+            {
+                if (random.Next() % 10 == 0)
+                    markdownBuilder.Append('_');
+                else if (random.Next() % 5 == 1)
+                    markdownBuilder.Append(' ');
+                else
+                    markdownBuilder.Append('a');
+            }
+
+            new MarkdownRenderer(markdownBuilder.ToString()).RenderToHtml();
+        }
+
+        [Test, Timeout(1000)]
+        public void TenBigHighlights()
+        {
+            var charsCount = (int) 1e5;
+            var partsCount = 10;
+            var markdownBuilder = new StringBuilder(charsCount + 1);
+
+            for (int i = 0; i < charsCount; ++i)
+                if (charsCount % (charsCount / partsCount) == 0 && i != 0)
+                    markdownBuilder.Append("_ _");
+                else
+                    markdownBuilder.Append('a');
+
+            new MarkdownRenderer(markdownBuilder.ToString()).RenderToHtml();
         }
     }
 }
