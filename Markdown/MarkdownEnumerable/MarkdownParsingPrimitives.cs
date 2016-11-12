@@ -1,5 +1,4 @@
 ﻿using System;
-using Markdown.TagsRepresentation;
 
 namespace Markdown.MarkdownEnumerable
 {

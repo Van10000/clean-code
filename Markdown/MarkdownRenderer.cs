@@ -67,7 +67,7 @@ namespace Markdown
 
         private string WrapIntoTag(string str, Tag tag, ITagsRepresentation representation)
         {
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             result.Append(representation.GetOpeningTag(tag));
             result.Append(str);
             result.Append(representation.GetClosingTag(tag));

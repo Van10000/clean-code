@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Markdown.MarkdownEnumerable
@@ -9,7 +7,7 @@ namespace Markdown.MarkdownEnumerable
     {
         private readonly string markdown;
         private int currentPosition;
-        private Tag[] allPossibleTags = (Tag[])Enum.GetValues(typeof (Tag));
+        private readonly Tag[] allPossibleTags = (Tag[])Enum.GetValues(typeof (Tag));
 
         public StringMarkdownEnumerable(string markdown)
         {

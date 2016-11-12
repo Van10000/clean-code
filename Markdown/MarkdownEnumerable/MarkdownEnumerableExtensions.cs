@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Markdown.MarkdownEnumerable
 {
@@ -38,7 +37,8 @@ namespace Markdown.MarkdownEnumerable
         {
             var parsed = new StringBuilder();
             var ignoredUselessTags = tagInfos
-                .Where(tagInfo => tagInfo.Tag != Tag.None && tagInfo.TagType != TagType.None);
+                .Where(tagInfo => tagInfo.Tag != Tag.None && tagInfo.TagType != TagType.None)
+                .ToList();
             while (!markdown.IsFinished())
             {
                 foreach (var tagInfo in ignoredUselessTags)
