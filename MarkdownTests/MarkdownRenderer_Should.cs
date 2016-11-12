@@ -50,7 +50,7 @@ namespace MarkdownTests
             new MarkdownRenderer(markdownBuilder.ToString()).RenderToHtml();
         }
 
-        [Test, Timeout(1000)]
+        [Test, Timeout(2000)]
         public void TenBigHighlights()
         {
             var charsCount = (int) 1e5;
