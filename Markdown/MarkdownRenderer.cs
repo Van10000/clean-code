@@ -34,17 +34,9 @@ namespace Markdown
 		{
 		    return Render(Tag.None, new HtmlTagsRepresentation());
 		}
-
-	    /// <summary>
-	    /// Recursive method.
-	    /// If we meet closing tag - return parsed string.
-	    /// If we meet tag of different type - recursively call this method.
-	    /// <param name="curTag">Last tag we are inside</param>
-	    /// </summary>
+        
 	    private string Render(Tag curTag, ITagsRepresentation tagsRepresentation)
 	    {
-	        // here will be a switch on curTag
-	        // for parsing we will use MarkdownParsingExtentions.ParseUntil
 	        var stopTags = stopTagsDict[curTag];
 	        var resultBuilder = new StringBuilder();
 

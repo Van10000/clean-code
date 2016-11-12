@@ -64,7 +64,7 @@ namespace Markdown.MarkdownEnumerable
                 }
                 parsed.Append(markdown.GetNextChar());
             }
-            stoppedAt = new TagInfo(Tag.None, TagType.None);
+            stoppedAt = new TagInfo(Tag.None, TagType.None); // if finish
             return parsed.ToString();
         }
 

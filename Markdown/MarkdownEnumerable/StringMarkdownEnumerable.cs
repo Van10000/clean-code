@@ -40,9 +40,11 @@ namespace Markdown.MarkdownEnumerable
             return currentPosition == markdown.Length;
         }
 
-        private Tag FirstTagMatchingOrNone(IEnumerable<Tag> tags, Predicate<Tag> prediate)
+        private static Tag FirstTagMatchingOrNone(IEnumerable<Tag> tags, Predicate<Tag> prediate)
         {
-            foreach (var tag in tags)
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            // because if Tag.None int value will change - linq would become wrong(linq is 'firstOrDefault')
+            foreach (var tag in tags) 
                 if (tag != Tag.None && prediate(tag))
                     return tag;
             return Tag.None;
