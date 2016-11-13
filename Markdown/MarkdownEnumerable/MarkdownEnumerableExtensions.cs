@@ -75,7 +75,7 @@ namespace Markdown.MarkdownEnumerable
 
         private static void SkipTag(this IMarkdownEnumerable markdown, Tag tag)
         {
-            var tagRepresentation = MarkdownParsingPrimitives.GetTagRepresentation(tag);
+            var tagRepresentation = MarkdownParsingUtils.GetTagRepresentation(tag);
             markdown.SkipCharacters(tagRepresentation.Length);
         }
     }
