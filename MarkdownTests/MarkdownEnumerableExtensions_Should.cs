@@ -38,7 +38,7 @@ namespace MarkdownTests
 
             markdown.IsFinished().Should().BeTrue();
         }
-        
+
         [TestCase("ab _d", Tag.Italic, TagType.Opening, 'd', TestName = "Italic opening tag")]
         [TestCase("ab_ d", Tag.Italic, TagType.Closing, ' ', TestName = "Italic closing tag")]
         [TestCase("__d", Tag.Strong, TagType.Opening, 'd', TestName = "Strong opening tag")]
@@ -82,7 +82,7 @@ namespace MarkdownTests
         [Test]
         public void ParseUntilManyTags()
         {
-            var tags = new []
+            var tags = new[]
             {
                 new TagInfo(Tag.Strong, TagType.Opening),
                 new TagInfo(Tag.Strong, TagType.Closing),
@@ -113,7 +113,7 @@ namespace MarkdownTests
         {
             var markdownEnumerable = new StringMarkdownEnumerable(markdown);
             var tagInfo = new TagInfo(tag, tagType);
-            
+
             markdownEnumerable.ParseUntil(new[] { tagInfo }, out stoppedAt);
 
             return markdownEnumerable;

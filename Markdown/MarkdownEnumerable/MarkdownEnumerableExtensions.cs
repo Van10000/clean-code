@@ -9,7 +9,6 @@ namespace Markdown.MarkdownEnumerable
     {
         public static void SkipNextTag(this IMarkdownEnumerable markdown, TagType tagType)
         {
-            // CR: default is missing
             switch (tagType)
             {
                 case TagType.Opening:
@@ -20,26 +19,25 @@ namespace Markdown.MarkdownEnumerable
                     break;
                 case TagType.None:
                     break; // ignore
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(tagType), tagType, "Unknown tag type");
             }
         }
 
         public static void SkipNextOpeningTag(this IMarkdownEnumerable markdown)
         {
             markdown.SkipTag(markdown.GetNextOpeningTag());
-
         }
 
         public static void SkipNextClosingTag(this IMarkdownEnumerable markdown)
         {
             markdown.SkipTag(markdown.GetNextClosingTag());
         }
-        
+
         public static string ParseUntil(this IMarkdownEnumerable markdown, IEnumerable<TagInfo> tagInfos, out TagInfo stoppedAt)
         {
             var parsed = new StringBuilder();
-            var ignoredUselessTags = tagInfos
-                .Where(tagInfo => tagInfo.Tag != Tag.None && tagInfo.TagType != TagType.None)
-                .ToList();
+            var ignoredUselessTags = tagInfos.Where(tagInfo => tagInfo.Tag != Tag.None && tagInfo.TagType != TagType.None).ToList();
             while (!markdown.IsFinished())
             {
                 foreach (var tagInfo in ignoredUselessTags)

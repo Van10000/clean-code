@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Markdown.MarkdownEnumerable
 {
     public class StringMarkdownEnumerable : IMarkdownEnumerable
     {
-        // Nit: It generally looks better when you bundle variables.
-        // For example, first all "constants", then all instance
-        // readonly fields and then instance variable fields.
+        private static readonly Tag[] AllPossibleTags = (Tag[])Enum.GetValues(typeof(Tag));
+
         private readonly string markdown;
+
         private int currentPosition;
-        // CR: Can be made static
-        private readonly Tag[] allPossibleTags = (Tag[])Enum.GetValues(typeof (Tag));
 
         public StringMarkdownEnumerable(string markdown)
         {
@@ -21,12 +20,12 @@ namespace Markdown.MarkdownEnumerable
 
         public Tag GetNextOpeningTag()
         {
-            return FirstTagMatchingOrNone(allPossibleTags, tag => MarkdownParsingPrimitives.IsOpeningTag(tag, markdown, currentPosition));
+            return FirstTagMatchingOrNone(AllPossibleTags, tag => MarkdownParsingUtils.IsOpeningTag(tag, markdown, currentPosition));
         }
 
         public Tag GetNextClosingTag()
         {
-            return FirstTagMatchingOrNone(allPossibleTags, tag => MarkdownParsingPrimitives.IsClosingTag(tag, markdown, currentPosition));
+            return FirstTagMatchingOrNone(AllPossibleTags, tag => MarkdownParsingUtils.IsClosingTag(tag, markdown, currentPosition));
         }
 
         public char GetNextChar()
@@ -43,17 +42,12 @@ namespace Markdown.MarkdownEnumerable
         {
             return currentPosition == markdown.Length;
         }
-
-        // Nit: Consider moving it to the separate helper. Smth like
-        // .FirstOrDefault(pred, default). Because this behavios is quite general
+        
         private static Tag FirstTagMatchingOrNone(IEnumerable<Tag> tags, Predicate<Tag> prediate)
         {
-            // ReSharper disable once LoopCanBeConvertedToQuery
-            // because if Tag.None int value will change - linq would become wrong(linq is 'firstOrDefault')
-            foreach (var tag in tags) 
-                if (tag != Tag.None && prediate(tag))
-                    return tag;
-            return Tag.None;
+            return tags
+                .Where(tag => tag != Tag.None)
+                .FirstOrDefault(prediate, Tag.None);
         }
     }
 }

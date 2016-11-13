@@ -19,10 +19,4 @@
 
         bool IsFinished();
     }
-
-    // CR: One class = one file
-    public enum Tag
-    {
-        None, Strong, Italic
-    }
 }
