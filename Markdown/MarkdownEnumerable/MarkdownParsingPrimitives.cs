@@ -4,10 +4,12 @@ using System.Linq;
 
 namespace Markdown.MarkdownEnumerable
 {
+    // CR: Name is misleading, it's Helper or Utils, not Primitives
     internal static class MarkdownParsingPrimitives
     {
         private const string Digits = "0123456789";
         private const char Underscore = '_';
+        // CR: What about '\u00a0'? And '\u2000'? And '\u2001'?
         private const string SpaceSymbols = " \n\r\u0009";
 
         public static bool IsOpeningTag(Tag tag, string markdown, int position)
@@ -61,6 +63,7 @@ namespace Markdown.MarkdownEnumerable
         {
             if (tagType == TagType.None)
                 return false;
+            // Nit: extra line between ifs makes it better, innit?
             if (tagType == TagType.Opening)
             {
                 var correctAtPositionBefore =
@@ -71,6 +74,8 @@ namespace Markdown.MarkdownEnumerable
                     IsNotAnySymbolAtPosition(markdown, positionAfter, SpaceSymbols);
                 return correctAtPositionBefore && correctAtPositionAfter;
             }
+            // CR: Follow resharper's advice. Additionally if
+            // 'if' statement has brackets, 'else' should have them also
             else if (tagType == TagType.Closing)
                 return AreGoodPositionsForTag(TagType.Opening, markdown, positionAfter, positionBefore);
             else

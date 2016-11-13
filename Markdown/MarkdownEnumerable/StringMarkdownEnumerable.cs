@@ -5,8 +5,12 @@ namespace Markdown.MarkdownEnumerable
 {
     public class StringMarkdownEnumerable : IMarkdownEnumerable
     {
+        // Nit: It generally looks better when you bundle variables.
+        // For example, first all "constants", then all instance
+        // readonly fields and then instance variable fields.
         private readonly string markdown;
         private int currentPosition;
+        // CR: Can be made static
         private readonly Tag[] allPossibleTags = (Tag[])Enum.GetValues(typeof (Tag));
 
         public StringMarkdownEnumerable(string markdown)
@@ -40,6 +44,8 @@ namespace Markdown.MarkdownEnumerable
             return currentPosition == markdown.Length;
         }
 
+        // Nit: Consider moving it to the separate helper. Smth like
+        // .FirstOrDefault(pred, default). Because this behavios is quite general
         private static Tag FirstTagMatchingOrNone(IEnumerable<Tag> tags, Predicate<Tag> prediate)
         {
             // ReSharper disable once LoopCanBeConvertedToQuery

@@ -26,6 +26,7 @@ namespace MarkdownTests
             var renderer = new MarkdownRenderer(markdown);
 
             var htmlResult = renderer.RenderToHtml();
+            Console.WriteLine(htmlResult);
 
             htmlResult.Should().Be(expectedHtmlResult);
         }

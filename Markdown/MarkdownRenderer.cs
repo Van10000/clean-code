@@ -5,6 +5,7 @@ using Markdown.TagsRepresentation;
 
 namespace Markdown
 {
+    // CR: Spaces only or tabs only
 	public class MarkdownRenderer
 	{
 	    private readonly IMarkdownEnumerable markdown;
@@ -48,6 +49,7 @@ namespace Markdown
 	            if (ShouldCloseTag(stoppedAt.TagType))
 	                return resultBuilder.ToString();
                 var renderedInsideTag = Render(stoppedAt.Tag, tagsRepresentation);
+                // CR: ALWAYS compile your code & run tests before submitting
                 WrapIntoTag(resultBuilder, renderedInsideTag, stoppedAt.Tag, tagsRepresentation));
             }
 	    }

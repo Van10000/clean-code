@@ -12,6 +12,7 @@
         }
     }
 
+    // CR: One class = one file
     internal enum TagType
     {
         None, Opening, Closing

@@ -9,6 +9,7 @@ namespace Markdown.MarkdownEnumerable
     {
         public static void SkipNextTag(this IMarkdownEnumerable markdown, TagType tagType)
         {
+            // CR: default is missing
             switch (tagType)
             {
                 case TagType.Opening:
