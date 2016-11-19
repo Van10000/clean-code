@@ -18,14 +18,13 @@ namespace Markdown.MarkdownEnumerable
             currentPosition = 0;
         }
 
-        public Tag GetNextOpeningTag()
+        public TagInfo GetNextTag(IEnumerable<TagInfo> possibleTags)
         {
-            return FirstTagMatchingOrNone(AllPossibleTags, tag => MarkdownParsingUtils.IsOpeningTag(tag, markdown, currentPosition));
-        }
-
-        public Tag GetNextClosingTag()
-        {
-            return FirstTagMatchingOrNone(AllPossibleTags, tag => MarkdownParsingUtils.IsClosingTag(tag, markdown, currentPosition));
+            var possibleTagsList = possibleTags as IList<TagInfo> ?? possibleTags.ToList();
+            return possibleTagsList
+                .Where(tag => MarkdownParsingUtils.IsCorrectTag(tag, markdown, currentPosition))
+                .FirstOrDefault(possibleTagsList.Contains) // possble to do it more efficiently, but doesn't matter here.
+                ?? TagInfo.None;
         }
 
         public char GetNextChar()
@@ -41,13 +40,6 @@ namespace Markdown.MarkdownEnumerable
         public bool IsFinished()
         {
             return currentPosition == markdown.Length;
-        }
-        
-        private static Tag FirstTagMatchingOrNone(IEnumerable<Tag> tags, Predicate<Tag> prediate)
-        {
-            return tags
-                .Where(tag => tag != Tag.None)
-                .FirstOrDefault(prediate, Tag.None);
         }
     }
 }

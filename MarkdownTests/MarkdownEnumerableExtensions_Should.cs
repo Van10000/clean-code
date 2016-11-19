@@ -17,28 +17,6 @@ namespace MarkdownTests
             markdown.GetNextChar().Should().Be('c');
         }
 
-        [Test]
-        public void SkipNextOpeningTag()
-        {
-            var markdown = new StringMarkdownEnumerable("abc __de");
-
-            markdown.SkipCharacters(4);
-            markdown.SkipNextOpeningTag();
-
-            markdown.GetNextChar().Should().Be('d');
-        }
-
-        [Test]
-        public void SkipNextClosingTag()
-        {
-            var markdown = new StringMarkdownEnumerable(" abc__");
-
-            markdown.SkipCharacters(4);
-            markdown.SkipNextClosingTag();
-
-            markdown.IsFinished().Should().BeTrue();
-        }
-
         [TestCase("ab _d", Tag.Italic, TagType.Opening, 'd', TestName = "Italic opening tag")]
         [TestCase("ab_ d", Tag.Italic, TagType.Closing, ' ', TestName = "Italic closing tag")]
         [TestCase("__d", Tag.Strong, TagType.Opening, 'd', TestName = "Strong opening tag")]

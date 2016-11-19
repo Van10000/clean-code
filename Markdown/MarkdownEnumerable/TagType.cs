@@ -1,7 +1,7 @@
 ﻿namespace Markdown.MarkdownEnumerable
 {
-    internal enum TagType
+    public enum TagType
     {
-        None, Opening, Closing
+        None, Opening, Middle, Closing
     }
 }

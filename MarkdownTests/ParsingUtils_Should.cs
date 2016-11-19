@@ -21,7 +21,8 @@ namespace MarkdownTests
         [TestCase(Tag.Italic, "__a__", 4, ExpectedResult = false, TestName = "Italic near to _")]
         public bool Detect_OpeningTag(Tag tag, string str, int pos)
         {
-            return MarkdownParsingUtils.IsOpeningTag(tag, str, pos);
+            var tagInfo = new TagInfo(tag, TagType.Opening);
+            return MarkdownParsingUtils.IsCorrectTag(tagInfo, str, pos);
         }
 
         [TestCase(Tag.Italic, "c_", 1, ExpectedResult = true, TestName = "Simple italic closing tag")]
@@ -30,13 +31,15 @@ namespace MarkdownTests
         [TestCase(Tag.Italic, "a_ b", 1, ExpectedResult = true, TestName = "Gap in another side")]
         public bool Detect_ClosingTag(Tag tag, string str, int pos)
         {
-            return MarkdownParsingUtils.IsClosingTag(tag, str, pos);
+            var tagInfo = new TagInfo(tag, TagType.Closing);
+            return MarkdownParsingUtils.IsCorrectTag(tagInfo, str, pos);
         }
 
-        [Test]
-        public void ThrowException_IfNone()
-        {
-            Assert.Throws<ArgumentException>(() => MarkdownParsingUtils.IsOpeningTag(Tag.None, "asdasdff", 2));
-        }
+        //[Test]
+        //public void ThrowException_IfNone()
+        //{
+        //    Assert.Throws<ArgumentException>(() => 
+        //        MarkdownParsingUtils.IsCorrectTag(new TagInfo(Tag.None, TagType.Opening), "asdasdff", 2));
+        //}
     }
 }

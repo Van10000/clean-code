@@ -1,16 +1,13 @@
-﻿namespace Markdown.MarkdownEnumerable
+﻿using System.Collections.Generic;
+
+namespace Markdown.MarkdownEnumerable
 {
     public interface IMarkdownEnumerable
     {
         /// <summary>
-        /// Returns opening tag starting from next position, or Tag.None if there's no tag starting there.
+        /// Returns TagInfo for tag starting from next position, or TagInfo.None if there's no tag starting there.
         /// </summary>
-        Tag GetNextOpeningTag();
-
-        /// <summary>
-        /// Returns closing tag starting from next position, or Tag.None if there's no tag starting there.
-        /// </summary>
-        Tag GetNextClosingTag();
+        TagInfo GetNextTag(IEnumerable<TagInfo> possibleTags);
         
         /// <summary>
         /// Returns next char in enumerable and enumerates to the next position.

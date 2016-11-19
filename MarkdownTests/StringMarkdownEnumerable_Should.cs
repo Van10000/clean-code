@@ -22,27 +22,22 @@ namespace MarkdownTests
             allChars.ToString().Should().Be(markdown.Replace(@"\", ""));
         }
 
-        [TestCase(" __c__ ", 1, ExpectedResult = Tag.Strong)]
-        [TestCase("_", 0, ExpectedResult = Tag.Italic)]
-        [TestCase("asdb wer", 2, ExpectedResult = Tag.None)]
-        public Tag AtSpecifiedPosition_ReturnNextOpeningTag(string markdown, int position)
+        [TestCase("e__", 1, Tag.Strong, TagType.Closing)]
+        [TestCase(" f_ d ", 2, Tag.Italic, TagType.Closing)]
+        [TestCase("", 0, Tag.None, TagType.None)]
+        [TestCase("sadfasrw", 5, Tag.None, TagType.None)]
+        [TestCase(" __c__ ", 1, Tag.Strong, TagType.Opening)]
+        [TestCase("_", 0, Tag.Italic, TagType.Opening)]
+        [TestCase("asdb wer", 2, Tag.None, TagType.None)]
+        public void AtSpecifiedPosition_FindNextClosingTag(string markdown, int position, Tag expectedTag, TagType expectedType)
         {
             var markdownEnumerable = new StringMarkdownEnumerable(markdown);
             markdownEnumerable.SkipCharacters(position);
+            var expectedTagInfo = new TagInfo(expectedTag, expectedType);
 
-            return markdownEnumerable.GetNextOpeningTag();
-        }
+            var returnedTagInfo = markdownEnumerable.GetNextTag(new [] { expectedTagInfo});
 
-        [TestCase("e__", 1, ExpectedResult = Tag.Strong)]
-        [TestCase(" f_ d ", 2, ExpectedResult = Tag.Italic)]
-        [TestCase("", 0, ExpectedResult = Tag.None)]
-        [TestCase("sadfasrw", 5, ExpectedResult = Tag.None)]
-        public Tag AtSpecifiedPosition_ReturnNextClosingTag(string markdown, int position)
-        {
-            var markdownEnumerable = new StringMarkdownEnumerable(markdown);
-            markdownEnumerable.SkipCharacters(position);
-
-            return markdownEnumerable.GetNextClosingTag();
+            returnedTagInfo.Should().Be(expectedTagInfo);
         }
     }
 }

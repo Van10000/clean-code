@@ -10,24 +10,12 @@ namespace Markdown.MarkdownEnumerable
         private const char Underscore = '_';
         private const string SpaceSymbols = " \n\r\u0009\u00a0\u2000\u2001";
 
-        public static bool IsOpeningTag(Tag tag, string markdown, int position)
+        public static bool IsCorrectTag(TagInfo tagInfo, string markdown, int position)
         {
-            return IsCorrectTag(tag, TagType.Opening, markdown, position);
-        }
-
-        public static bool IsClosingTag(Tag tag, string markdown, int position)
-        {
-            return IsCorrectTag(tag, TagType.Closing, markdown, position);
-        }
-
-        public static bool IsCorrectTag(Tag tag, TagType tagType, string markdown, int position)
-        {
-            if (tag == Tag.None)
-                throw new ArgumentException("Tag should not be Tag.None");
-            if (tagType == TagType.None)
+            if (tagInfo.Tag == Tag.None || tagInfo.TagType == TagType.None)
                 return false;
 
-            var tagRepresentation = GetTagRepresentation(tag);
+            var tagRepresentation = GetTagRepresentation(tagInfo);
             var positionAfterTagEnd = position + tagRepresentation.Length;
             var positionBeforeTagStart = position - 1;
 
@@ -39,12 +27,12 @@ namespace Markdown.MarkdownEnumerable
             if (markdown.Substring(position, tagRepresentation.Length) != tagRepresentation)
                 return false;
 
-            return AreGoodPositionsForTag(tagType, markdown, positionBeforeTagStart, positionAfterTagEnd);
+            return AreGoodPositionsForTag(tagInfo.TagType, markdown, positionBeforeTagStart, positionAfterTagEnd);
         }
 
-        public static string GetTagRepresentation(Tag tag)
+        public static string GetTagRepresentation(TagInfo tag)
         {
-            switch (tag)
+            switch (tag.Tag)
             {
                 case Tag.Strong:
                     return "__";
