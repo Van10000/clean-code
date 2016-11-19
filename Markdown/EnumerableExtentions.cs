@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Markdown
 {
-    static class EnumerableExtentions
+    internal static class EnumerableExtentions
     {
         public static T FirstOrDefault<T>(this IEnumerable<T> items, Predicate<T> prediate, T defaultValue)
         {

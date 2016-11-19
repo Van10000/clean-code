@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace MarkdownTests
 {
     [TestFixture]
-    internal class ParsingPrimitives_Should
+    internal class ParsingUtils_Should
     {
         [TestCase(Tag.Strong, " __c", 1, ExpectedResult = true, TestName = "Simple strong tag")]
         [TestCase(Tag.Strong, " __c", 2, ExpectedResult = false, TestName = "Strong tag at wrong position")]
