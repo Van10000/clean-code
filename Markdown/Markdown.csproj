@@ -69,6 +69,7 @@
     <Compile Include="MarkdownEnumerable\Tag.cs" />
     <Compile Include="MarkdownEnumerable\TagType.cs" />
     <Compile Include="MarkdownEnumerable\TagInfo.cs" />
+    <Compile Include="MarkdownRenderingUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MarkdownEnumerable\MarkdownEnumerableExtensions.cs" />
     <Compile Include="TagsRepresentation\ITagsRepresentation.cs" />

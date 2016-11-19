@@ -3,7 +3,7 @@ using Markdown.MarkdownEnumerable;
 
 namespace Markdown.TagsRepresentation
 {
-    internal class HtmlTagsRepresentation : ITagsRepresentation
+    public class HtmlTagsRepresentation : ITagsRepresentation
     {
         public string GetRepresentation(TagInfo tagInfo)
         {

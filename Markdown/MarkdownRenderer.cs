@@ -7,6 +7,7 @@ using Markdown.TagsRepresentation;
 
 namespace Markdown
 {
+    //this class is thread unsafe
     public class MarkdownRenderer
     {
         private readonly IMarkdownEnumerable markdown;
@@ -24,40 +25,55 @@ namespace Markdown
 
             {Tag.Hyperlink, new[] { new TagInfo(Tag.Italic, TagType.Opening),
                                     new TagInfo(Tag.Strong, TagType.Opening),
-                                    new TagInfo(Tag.Hyperlink, TagType.Closing) } }
+                                    new TagInfo(Tag.Hyperlink, TagType.Middle)} }
         };
 
-        public MarkdownRenderer(IMarkdownEnumerable markdown)
+        private readonly Stack<StringBuilder> renderedParts = new Stack<StringBuilder>();
+        private readonly Stack<TagInfo> tagsStack = new Stack<TagInfo>();
+
+        private readonly ITagsRepresentation representation;
+
+        public MarkdownRenderer(IMarkdownEnumerable markdown, ITagsRepresentation representation)
         {
             this.markdown = markdown;
-        }
-
-        public MarkdownRenderer(string markdown)
-        {
-            this.markdown = new StringMarkdownEnumerable(markdown);
+            this.representation = representation;
         }
 
         public string RenderToHtml()
         {
-            return Render(Tag.None, Enumerable.Empty<TagInfo>(), new HtmlTagsRepresentation());
-        }
-
-        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")] // impossible to avoid reshaper message
-        private string Render(Tag curTag, IEnumerable<TagInfo> stopTags, ITagsRepresentation tagsRepresentation)
-        {
-            var resultBuilder = new StringBuilder();
-            var allStopTags = stopTagsDict[curTag].Concat(stopTags).ToList();
+            ClearState();
+            AddInitialStateToStacks();
 
             while (true)
             {
+                var curTag = tagsStack.Peek();
+                var stopTags = stopTagsDict[curTag.Tag]; // here will be a bit more complicated
+                var currentBuilder = renderedParts.Peek();
+
                 TagInfo stoppedAt;
-                var parsedPart = markdown.ParseUntil(allStopTags, out stoppedAt);
-                resultBuilder.Append(parsedPart);
+                var parsedPart = markdown.ParseUntil(stopTags, out stoppedAt);
+                currentBuilder.Append(parsedPart);
                 if (ShouldCloseTag(stoppedAt.TagType))
-                    return resultBuilder.ToString();
-                var renderedInsideTag = Render(stoppedAt.Tag, stopTags, tagsRepresentation);
-                WrapIntoTag(resultBuilder, renderedInsideTag, stoppedAt.Tag, tagsRepresentation);
+                {
+                    renderedParts.Pop();
+                    if (renderedParts.Count == 0)
+                        return currentBuilder.ToString();
+                    var nextLevelBuilder = renderedParts.Peek();
+                    WrapIntoTag(nextLevelBuilder, currentBuilder.ToString(), tagsStack.Pop().Tag/*here lose information*/);
+                }
+                else // here will also be case with middle
+                {
+                    renderedParts.Push(new StringBuilder());
+                    tagsStack.Push(stoppedAt);
+                }
             }
+        }
+
+        private void WrapIntoTag(StringBuilder builderToAddResult, string str, Tag tag)
+        {
+            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(tag, TagType.Opening)));
+            builderToAddResult.Append(str);
+            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(tag, TagType.Closing)));
         }
 
         private bool ShouldCloseTag(TagType tagType)
@@ -65,11 +81,16 @@ namespace Markdown
             return tagType == TagType.Closing || tagType == TagType.None; // none if markdown finished
         }
 
-        private void WrapIntoTag(StringBuilder builderToAddResult, string str, Tag tag, ITagsRepresentation representation)
+        private void ClearState()
         {
-            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(tag, TagType.Opening)));
-            builderToAddResult.Append(str);
-            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(tag, TagType.Closing)));
+            tagsStack.Clear();
+            renderedParts.Clear();
+        }
+
+        private void AddInitialStateToStacks()
+        {
+            tagsStack.Push(TagInfo.None);
+            renderedParts.Push(new StringBuilder());
         }
     }
 

@@ -36,5 +36,15 @@
                 return ((int) Tag * 397) ^ (int) TagType;
             }
         }
+
+        public static bool operator ==(TagInfo left, TagInfo right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(TagInfo left, TagInfo right)
+        {
+            return !Equals(left, right);
+        }
     }
 }

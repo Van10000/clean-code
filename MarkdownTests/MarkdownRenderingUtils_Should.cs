@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace MarkdownTests
 {
     [TestFixture]
-    internal class MarkdownRenderer_Should
+    internal class MarkdownRenderingUtils_Should
     {
         [TestCase("ab _c_ de", "ab <em>c</em> de", TestName = "Simple italic tag")]
         [TestCase(@"\_a\_", "_a_", TestName = "Escape italic")]
@@ -23,9 +23,8 @@ namespace MarkdownTests
         [TestCase("__a _b", "<strong>a <em>b</em></strong>", TestName = "Not closed tags close in the end")]
         public void RenderToHtml(string markdown, string expectedHtmlResult)
         {
-            var renderer = new MarkdownRenderer(markdown);
+            var htmlResult = MarkdownRenderingUtils.RenderToHtml(markdown);
 
-            var htmlResult = renderer.RenderToHtml();
             Console.WriteLine(htmlResult);
 
             htmlResult.Should().Be(expectedHtmlResult);
@@ -48,7 +47,7 @@ namespace MarkdownTests
                     markdownBuilder.Append('a');
             }
 
-            new MarkdownRenderer(markdownBuilder.ToString()).RenderToHtml();
+            MarkdownRenderingUtils.RenderToHtml(markdownBuilder.ToString());
         }
 
         [Test, Timeout(2000)]
@@ -64,7 +63,7 @@ namespace MarkdownTests
                 else
                     markdownBuilder.Append('a');
 
-            new MarkdownRenderer(markdownBuilder.ToString()).RenderToHtml();
+            MarkdownRenderingUtils.RenderToHtml(markdownBuilder.ToString());
         }
     }
 }
