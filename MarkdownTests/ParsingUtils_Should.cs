@@ -34,12 +34,5 @@ namespace MarkdownTests
             var tagInfo = new TagInfo(tag, TagType.Closing);
             return MarkdownParsingUtils.IsCorrectTag(tagInfo, str, pos);
         }
-
-        //[Test]
-        //public void ThrowException_IfNone()
-        //{
-        //    Assert.Throws<ArgumentException>(() => 
-        //        MarkdownParsingUtils.IsCorrectTag(new TagInfo(Tag.None, TagType.Opening), "asdasdff", 2));
-        //}
     }
 }

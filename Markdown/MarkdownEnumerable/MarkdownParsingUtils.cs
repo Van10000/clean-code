@@ -21,19 +21,27 @@ namespace Markdown.MarkdownEnumerable
 
             if (positionAfterTagEnd > markdown.Length)
                 return false;
-            var positionsBeforeAndAfter = new[] {positionBeforeTagStart, positionAfterTagEnd};
-            if (IsAnySymbolAtAnyPosition(markdown, positionsBeforeAndAfter, Underscore + Digits))
-                return false;
             if (markdown.Substring(position, tagRepresentation.Length) != tagRepresentation)
                 return false;
 
-            return AreGoodPositionsForTag(tagInfo.TagType, markdown, positionBeforeTagStart, positionAfterTagEnd);
+            switch (tagInfo.Tag)
+            {
+                case Tag.Italic:
+                case Tag.Strong:
+                    return IsCorrectUnderscoreTag(tagInfo, markdown, positionBeforeTagStart, positionAfterTagEnd);
+                case Tag.Hyperlink:
+                    return true;
+                default:
+                    throw new ArgumentException($"Unknown tag:{tagInfo.Tag}");
+            }
         }
 
         public static string GetTagRepresentation(TagInfo tag)
         {
             switch (tag.Tag)
             {
+                case Tag.Hyperlink:
+                    return GetHyperlinkRepresentation(tag.TagType);
                 case Tag.Strong:
                     return "__";
                 case Tag.Italic:
@@ -45,6 +53,30 @@ namespace Markdown.MarkdownEnumerable
             }
         }
 
+        private static string GetHyperlinkRepresentation(TagType type)
+        {
+            switch (type)
+            {
+                case TagType.Opening:
+                    return "[";
+                case TagType.Middle:
+                    return "](";
+                case TagType.Closing:
+                    return ")";
+                default:
+                    throw new ArgumentException($"Unknown tag type:{type}");
+            }
+        }
+
+        private static bool IsCorrectUnderscoreTag(TagInfo tagInfo, string markdown, int positionBefore, int positionAfter)
+        {
+            var positionsBeforeAndAfter = new[] {positionBefore, positionAfter};
+            if (IsAnySymbolAtAnyPosition(markdown, positionsBeforeAndAfter, Underscore + Digits))
+                return false;
+
+            return AreGoodPositionsForTag(tagInfo.TagType, markdown, positionBefore, positionAfter);
+        }
+
         private static bool AreGoodPositionsForTag(TagType tagType, string markdown, int positionBefore, int positionAfter)
         {
             if (tagType == TagType.None)
@@ -52,12 +84,8 @@ namespace Markdown.MarkdownEnumerable
 
             if (tagType == TagType.Opening)
             {
-                var correctAtPositionBefore =
-                    IsPositionOutOfRange(markdown, positionBefore) || 
-                    IsAnySymbolAtPosition(markdown, positionBefore, SpaceSymbols);
-                var correctAtPositionAfter =
-                    IsPositionOutOfRange(markdown, positionAfter) ||
-                    IsNotAnySymbolAtPosition(markdown, positionAfter, SpaceSymbols);
+                var correctAtPositionBefore = IsPositionOutOfRange(markdown, positionBefore) || IsAnySymbolAtPosition(markdown, positionBefore, SpaceSymbols);
+                var correctAtPositionAfter = IsPositionOutOfRange(markdown, positionAfter) || IsNotAnySymbolAtPosition(markdown, positionAfter, SpaceSymbols);
                 return correctAtPositionBefore && correctAtPositionAfter;
             }
             if (tagType == TagType.Closing)
@@ -82,8 +110,7 @@ namespace Markdown.MarkdownEnumerable
             return markdown[position] == symbol;
         }
 
-        private static bool IsNotAnySymbolAtPosition(string markdown, int position, IEnumerable<char> symbols)
-            => symbols.All(symbol => IsNotSymbolAtPosition(markdown, position, symbol));
+        private static bool IsNotAnySymbolAtPosition(string markdown, int position, IEnumerable<char> symbols) => symbols.All(symbol => IsNotSymbolAtPosition(markdown, position, symbol));
 
         private static bool IsNotSymbolAtPosition(string markdown, int position, char symbol)
         {

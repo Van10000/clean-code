@@ -12,17 +12,25 @@ namespace MarkdownTests
         [TestCase(Tag.None, ExpectedResult = "")]
         [TestCase(Tag.Italic, ExpectedResult = "<em>")]
         [TestCase(Tag.Strong, ExpectedResult = "<strong>")]
-        public string Return_RightOpeningTag(Tag tag)
+        [TestCase(Tag.Hyperlink, ExpectedResult = "<a href=\"")]
+        public string ReturnRightOpeningTag(Tag tag)
         {
-            return representation.GetOpeningTag(tag);
+            return representation.GetRepresentation(new TagInfo(tag, TagType.Opening));
+        }
+
+        [TestCase(Tag.Hyperlink, ExpectedResult = "\">")]
+        public string ReturnRightMiddleTag(Tag tag)
+        {
+            return representation.GetRepresentation(new TagInfo(tag, TagType.Middle));
         }
 
         [TestCase(Tag.None, ExpectedResult = "")]
         [TestCase(Tag.Italic, ExpectedResult = "</em>")]
         [TestCase(Tag.Strong, ExpectedResult = "</strong>")]
-        public string Return_RightClosingTag(Tag tag)
+        [TestCase(Tag.Hyperlink, ExpectedResult = "</a>")]
+        public string ReturnRightClosingTag(Tag tag)
         {
-            return representation.GetClosingTag(tag);
+            return representation.GetRepresentation(new TagInfo(tag, TagType.Closing));
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 using Markdown.MarkdownEnumerable;
 using Markdown.TagsRepresentation;
@@ -11,13 +13,18 @@ namespace Markdown
 
         private readonly Dictionary<Tag, TagInfo[]> stopTagsDict = new Dictionary<Tag, TagInfo[]>
         {
-            {Tag.Italic, new[] { new TagInfo(Tag.Italic, TagType.Closing) } },
+            {Tag.Italic,    new[] { new TagInfo(Tag.Italic, TagType.Closing) } },
 
-            {Tag.Strong, new[] { new TagInfo(Tag.Strong, TagType.Closing),
-                                 new TagInfo(Tag.Italic, TagType.Opening) } },
+            {Tag.Strong,    new[] { new TagInfo(Tag.Strong, TagType.Closing),
+                                    new TagInfo(Tag.Italic, TagType.Opening) } },
 
-            {Tag.None,   new[] { new TagInfo(Tag.Italic, TagType.Opening),
-                                 new TagInfo(Tag.Strong, TagType.Opening)} }
+            {Tag.None,      new[] { new TagInfo(Tag.Italic, TagType.Opening),
+                                    new TagInfo(Tag.Strong, TagType.Opening),
+                                    new TagInfo(Tag.Hyperlink, TagType.Opening)} },
+
+            {Tag.Hyperlink, new[] { new TagInfo(Tag.Italic, TagType.Opening),
+                                    new TagInfo(Tag.Strong, TagType.Opening),
+                                    new TagInfo(Tag.Hyperlink, TagType.Closing) } }
         };
 
         public MarkdownRenderer(IMarkdownEnumerable markdown)
@@ -32,22 +39,23 @@ namespace Markdown
 
         public string RenderToHtml()
         {
-            return Render(Tag.None, new HtmlTagsRepresentation());
+            return Render(Tag.None, Enumerable.Empty<TagInfo>(), new HtmlTagsRepresentation());
         }
 
-        private string Render(Tag curTag, ITagsRepresentation tagsRepresentation)
+        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")] // impossible to avoid reshaper message
+        private string Render(Tag curTag, IEnumerable<TagInfo> stopTags, ITagsRepresentation tagsRepresentation)
         {
-            var stopTags = stopTagsDict[curTag];
             var resultBuilder = new StringBuilder();
+            var allStopTags = stopTagsDict[curTag].Concat(stopTags).ToList();
 
             while (true)
             {
                 TagInfo stoppedAt;
-                var parsedPart = markdown.ParseUntil(stopTags, out stoppedAt);
+                var parsedPart = markdown.ParseUntil(allStopTags, out stoppedAt);
                 resultBuilder.Append(parsedPart);
                 if (ShouldCloseTag(stoppedAt.TagType))
                     return resultBuilder.ToString();
-                var renderedInsideTag = Render(stoppedAt.Tag, tagsRepresentation);
+                var renderedInsideTag = Render(stoppedAt.Tag, stopTags, tagsRepresentation);
                 WrapIntoTag(resultBuilder, renderedInsideTag, stoppedAt.Tag, tagsRepresentation);
             }
         }
@@ -59,9 +67,9 @@ namespace Markdown
 
         private void WrapIntoTag(StringBuilder builderToAddResult, string str, Tag tag, ITagsRepresentation representation)
         {
-            builderToAddResult.Append(representation.GetOpeningTag(tag));
+            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(tag, TagType.Opening)));
             builderToAddResult.Append(str);
-            builderToAddResult.Append(representation.GetClosingTag(tag));
+            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(tag, TagType.Closing)));
         }
     }
 

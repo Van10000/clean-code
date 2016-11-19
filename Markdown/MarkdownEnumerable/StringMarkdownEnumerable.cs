@@ -6,8 +6,6 @@ namespace Markdown.MarkdownEnumerable
 {
     public class StringMarkdownEnumerable : IMarkdownEnumerable
     {
-        private static readonly Tag[] AllPossibleTags = (Tag[])Enum.GetValues(typeof(Tag));
-
         private readonly string markdown;
 
         private int currentPosition;
