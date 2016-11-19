@@ -21,6 +21,9 @@ namespace MarkdownTests
         [TestCase("_a _", "<em>a _</em>", TestName = "Space symbol before end of highlight is not allowed")]
         [TestCase("_a b_c", "<em>a b_c</em>", TestName = "Non-space symbol after end of highlight is not allowed")]
         [TestCase("__a _b", "<strong>a <em>b</em></strong>", TestName = "Not closed tags close in the end")]
+        [TestCase("__a _b c__", "<strong>a <em>b c</em></strong>", TestName = "High level tag closes before low level")]
+        [TestCase("[abc](ya.ru)", "<a href=\"ya.ru\">abc</a>", TestName = "Simple hyperlink")]
+        [TestCase("[a __b _c](ya.ru)", "<a href=\"ya.ru\">a <strong>b <em>c</em></strong></a>", TestName = "High level of nesting")]
         public void RenderToHtml(string markdown, string expectedHtmlResult)
         {
             var htmlResult = MarkdownRenderingUtils.RenderToHtml(markdown);

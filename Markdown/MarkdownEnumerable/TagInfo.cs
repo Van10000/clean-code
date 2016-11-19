@@ -1,4 +1,6 @@
-﻿namespace Markdown.MarkdownEnumerable
+﻿using System;
+
+namespace Markdown.MarkdownEnumerable
 {
     public class TagInfo
     {
@@ -15,6 +17,41 @@
 
         public bool IsNone()
             => Tag == Tag.None && TagType == TagType.None;
+
+        public TagInfo GetOfNextType()
+        {
+            return new TagInfo(Tag, Tag == Tag.Hyperlink 
+                ? GetNextTagTypeWithMiddle(TagType)
+                : GetNextTagTypeWithoutMiddle(TagType));
+        }
+
+        public TagType GetNextTagTypeWithMiddle(TagType tagType)
+        {
+            switch (tagType)
+            {
+                case TagType.Opening:
+                    return TagType.Middle;
+                case TagType.Middle:
+                    return TagType.Closing;
+                case TagType.None:
+                    return TagType.None;
+                default:
+                    throw new ArgumentException($"Incorrect tag type:{tagType}");
+            }
+        }
+
+        public TagType GetNextTagTypeWithoutMiddle(TagType tagType)
+        {
+            switch (tagType)
+            {
+                case TagType.Opening:
+                    return TagType.Closing;
+                case TagType.None:
+                    return TagType.None;
+                default:
+                    throw new ArgumentException($"Incorrect tag type{tagType}");
+            }
+        }
 
         protected bool Equals(TagInfo other)
         {
@@ -45,6 +82,11 @@
         public static bool operator !=(TagInfo left, TagInfo right)
         {
             return !Equals(left, right);
+        }
+
+        public override string ToString()
+        {
+            return $"Tag: {Tag}, TagType: {TagType}";
         }
     }
 }

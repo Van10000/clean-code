@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -12,23 +13,16 @@ namespace Markdown
     {
         private readonly IMarkdownEnumerable markdown;
 
-        private readonly Dictionary<Tag, TagInfo[]> stopTagsDict = new Dictionary<Tag, TagInfo[]>
+        private readonly Dictionary<TagInfo, Tag[]> tagsInside = new Dictionary<TagInfo, Tag[]>
         {
-            {Tag.Italic,    new[] { new TagInfo(Tag.Italic, TagType.Closing) } },
-
-            {Tag.Strong,    new[] { new TagInfo(Tag.Strong, TagType.Closing),
-                                    new TagInfo(Tag.Italic, TagType.Opening) } },
-
-            {Tag.None,      new[] { new TagInfo(Tag.Italic, TagType.Opening),
-                                    new TagInfo(Tag.Strong, TagType.Opening),
-                                    new TagInfo(Tag.Hyperlink, TagType.Opening)} },
-
-            {Tag.Hyperlink, new[] { new TagInfo(Tag.Italic, TagType.Opening),
-                                    new TagInfo(Tag.Strong, TagType.Opening),
-                                    new TagInfo(Tag.Hyperlink, TagType.Middle)} }
+            {TagInfo.None, new[] {Tag.Strong, Tag.Italic, Tag.Hyperlink}},
+            {new TagInfo(Tag.Hyperlink, TagType.Opening), new[] {Tag.Strong, Tag.Italic}},
+            {new TagInfo(Tag.Hyperlink, TagType.Middle), new Tag[0] },
+            {new TagInfo(Tag.Italic, TagType.Opening), new Tag[0]},
+            {new TagInfo(Tag.Strong, TagType.Opening), new[] {Tag.Italic}}
         };
 
-        private readonly Stack<StringBuilder> renderedParts = new Stack<StringBuilder>();
+        private readonly Stack<List<StringBuilder>> renderedParts = new Stack<List<StringBuilder>>();
         private readonly Stack<TagInfo> tagsStack = new Stack<TagInfo>();
 
         private readonly ITagsRepresentation representation;
@@ -46,27 +40,103 @@ namespace Markdown
 
             while (true)
             {
-                var curTag = tagsStack.Peek();
-                var stopTags = stopTagsDict[curTag.Tag]; // here will be a bit more complicated
-                var currentBuilder = renderedParts.Peek();
+                var currentBuilder = GetCurrentRenderedPartBuilder();
+                var stopTags = GetCurrentStopTags();
 
                 TagInfo stoppedAt;
                 var parsedPart = markdown.ParseUntil(stopTags, out stoppedAt);
                 currentBuilder.Append(parsedPart);
                 if (ShouldCloseTag(stoppedAt.TagType))
                 {
-                    renderedParts.Pop();
-                    if (renderedParts.Count == 0)
-                        return currentBuilder.ToString();
-                    var nextLevelBuilder = renderedParts.Peek();
-                    WrapIntoTag(nextLevelBuilder, currentBuilder.ToString(), tagsStack.Pop().Tag/*here lose information*/);
+                    if (renderedParts.Count == 1)
+                        return GetTopLevelResult();
+                    if (GetLastTagStopTags().Contains(stoppedAt))
+                        CloseTopLevelTag();
+                    else while (tagsStack.Peek().GetOfNextType() != stoppedAt) // in case we closed tag at higher level
+                        CloseTopLevelTag();
                 }
-                else // here will also be case with middle
+                else if (stoppedAt.TagType == TagType.Middle)
                 {
-                    renderedParts.Push(new StringBuilder());
+                    while (tagsStack.Peek().GetOfNextType() != stoppedAt) // in case we closed tag at higher level
+                        CloseTopLevelTag();
+                    renderedParts.Peek().Add(new StringBuilder());
+                    tagsStack.Pop();
+                    tagsStack.Push(stoppedAt);
+                }
+                else
+                {
+                    AddTopLevelStringBuilder();
                     tagsStack.Push(stoppedAt);
                 }
             }
+        }
+
+        private string GetTopLevelResult()
+        { 
+            var currentList = renderedParts.Pop();
+            AddTopLevelStringBuilder();
+            renderedParts.Push(currentList);
+            CloseTopLevelTag();
+            return renderedParts.Pop().Last().ToString();
+        }
+
+        private void CloseTopLevelTag()
+        {
+            var currentList = renderedParts.Peek();
+            renderedParts.Pop();
+            var nextLevelBuilder = GetCurrentRenderedPartBuilder();
+            if (tagsStack.Peek().Tag == Tag.Hyperlink)
+            {
+                tagsStack.Pop();
+                var hyperlinkParts = currentList
+                    .Select(builder => builder.ToString())
+                    .ToArray();
+                WrapHyperlinkIntoTag(nextLevelBuilder, hyperlinkParts);
+            }
+            else
+                WrapIntoTag(nextLevelBuilder, currentList.Last().ToString(), tagsStack.Pop().Tag);
+        }
+
+        private void WrapHyperlinkIntoTag(StringBuilder builderToAddResult, string[] hyperlinkParts)
+        {
+            if (hyperlinkParts.Length != 2)
+                throw new InvalidOperationException($"Hyperlink should contain exactly 2 parts. " +
+                                                    $"Given hypelink contains {hyperlinkParts.Length} parts.");
+            var link = ToCorrectLink(hyperlinkParts[1]);
+            if (link == null)
+                throw new NotImplementedException(); //TODO: should not happen, need to rewrite it somehow
+            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Opening)));
+            builderToAddResult.Append(hyperlinkParts[1]);
+            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Middle)));
+            builderToAddResult.Append(hyperlinkParts[0]);
+            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Closing)));
+        }
+        
+        private string ToCorrectLink(string link)
+        {
+            var skippedSpaces = link
+                .SkipWhile(char.IsWhiteSpace)
+                .TakeWhile(ch => !char.IsWhiteSpace(ch))
+                .Aggregate(new StringBuilder(), (builder, ch) => builder.Append(ch))
+                .ToString();
+            if (skippedSpaces.Count(char.IsWhiteSpace) != link.Count(char.IsWhiteSpace))
+                return null;
+            return skippedSpaces;
+        }
+
+        private IEnumerable<TagInfo> GetCurrentStopTags()
+        {
+            foreach (var tag in GetLastTagStopTags())
+                yield return tag;
+            foreach (var tag in tagsStack)
+                yield return tag.GetOfNextType(); // higher level tags
+        }
+
+        private IEnumerable<TagInfo> GetLastTagStopTags()
+        {
+            foreach (var tag in tagsInside[tagsStack.Peek()])
+                yield return new TagInfo(tag, TagType.Opening);
+            yield return tagsStack.Peek().GetOfNextType();
         }
 
         private void WrapIntoTag(StringBuilder builderToAddResult, string str, Tag tag)
@@ -81,6 +151,11 @@ namespace Markdown
             return tagType == TagType.Closing || tagType == TagType.None; // none if markdown finished
         }
 
+        private StringBuilder GetCurrentRenderedPartBuilder()
+        {
+            return renderedParts.Peek().Last();
+        }
+
         private void ClearState()
         {
             tagsStack.Clear();
@@ -90,9 +165,12 @@ namespace Markdown
         private void AddInitialStateToStacks()
         {
             tagsStack.Push(TagInfo.None);
-            renderedParts.Push(new StringBuilder());
+            AddTopLevelStringBuilder();
+        }
+
+        private void AddTopLevelStringBuilder()
+        {
+            renderedParts.Push(new List<StringBuilder> { new StringBuilder() });
         }
     }
-
-
 }
