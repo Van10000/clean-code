@@ -23,16 +23,16 @@ namespace Markdown
 
         private readonly Stack<TagType> tagsStack = new Stack<TagType>();
         private readonly Stack<StringBuilder> renderedParts = new Stack<StringBuilder>();
-        private readonly Stack<ParsedTag> renderedTags = new Stack<ParsedTag>();
+        private readonly Stack<ParsedTag> parsedTags = new Stack<ParsedTag>();
 
         private readonly ITagsRepresentation representation;
         private readonly string baseUrl;
         private readonly string cssClass;
 
         private IEnumerable<TagInfo> TagInfosStack
-            => tagsStack.Zip(renderedTags.Select(parsedTag => parsedTag.Tag), (tagType, tag) => new TagInfo(tag, tagType));
+            => tagsStack.Zip(parsedTags.Select(parsedTag => parsedTag.Tag), (tagType, tag) => new TagInfo(tag, tagType));
 
-        private TagInfo CurrentTagInfo => new TagInfo(renderedTags.Peek().Tag, tagsStack.Peek());
+        private TagInfo CurrentTagInfo => new TagInfo(parsedTags.Peek().Tag, tagsStack.Peek());
 
         public static string RenderToHtml(string markdown)
         {
@@ -88,25 +88,7 @@ namespace Markdown
 
         private void AddCurrentValueToParsedTag()
         {
-            var currentTag = CurrentTagInfo;
-            var collectedValue = renderedParts.Peek().ToString();
-            if (currentTag.Tag == Tag.Hyperlink)
-            {
-                if (currentTag.TagType == TagType.Opening)
-                    renderedTags.Peek().Value = collectedValue;
-                else
-                {
-                    var correctLink = MarkdownParsingUtils.ToCorrectLink(collectedValue);
-                    if (correctLink == null)
-                        throw new InvalidOperationException("Link is incorrect"); // should not happen
-                    var absoluteLink = IsRelativeLink(correctLink) ? GetAbsoluteLink(correctLink) : correctLink;
-                    renderedTags.Peek().AddProperty("href", absoluteLink);
-                }
-            }
-            else
-            {
-                renderedTags.Peek().Value = collectedValue;
-            }
+            parsedTags.Peek().AddValueOrProperty(renderedParts.ToString(), tagsStack.Peek(), baseUrl);
         }
 
         private void CloseLowerLevelsOfTags(TagInfo stoppedAt)
@@ -120,18 +102,6 @@ namespace Markdown
             AddCurrentValueToParsedTag();
             var rendered = PopTag();
             renderedParts.Peek().Append(rendered);
-        }
-
-        private string GetAbsoluteLink(string relativeLink)
-        {
-            if (baseUrl == null)
-                throw new InvalidOperationException("Base url was not specified.");
-            return MarkdownParsingUtils.CombineLinks(baseUrl, relativeLink);
-        }
-
-        private bool IsRelativeLink(string correctLink)
-        {
-            return correctLink.Length == 0 || correctLink[0] == '/';
         }
 
         private IEnumerable<TagInfo> GetCurrentStopTags()
@@ -158,13 +128,13 @@ namespace Markdown
         {
             tagsStack.Clear();
             renderedParts.Clear();
-            renderedTags.Clear();
+            parsedTags.Clear();
         }
 
         private void PushTag(TagInfo tagInfo)
         {
             tagsStack.Push(tagInfo.TagType);
-            renderedTags.Push(new ParsedTag(tagInfo.Tag, representation));
+            parsedTags.Push(new ParsedTag(tagInfo.Tag, representation));
             renderedParts.Push(new StringBuilder());
         }
 
@@ -173,8 +143,8 @@ namespace Markdown
             tagsStack.Pop();
             renderedParts.Pop();
             if (cssClass != null)
-                renderedTags.Peek().AddProperty("class", cssClass);
-            return renderedTags.Pop().GetCurrentRepresentation();
+                parsedTags.Peek().AddProperty("class", cssClass);
+            return parsedTags.Pop().GetCurrentRepresentation();
         }
     }
 }

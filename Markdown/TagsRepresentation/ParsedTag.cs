@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Markdown.MarkdownEnumerable;
 
 namespace Markdown.TagsRepresentation
@@ -24,6 +22,40 @@ namespace Markdown.TagsRepresentation
         public void AddProperty(string propertyName, string value)
         {
             properties[propertyName] = value;
+        }
+
+        public void AddValueOrProperty(string valueOrProperty, TagType tagType, string baseUrl)
+        {
+            var collectedValue = valueOrProperty;
+            if (Tag == Tag.Hyperlink)
+            {
+                if (tagType == TagType.Opening)
+                    Value = collectedValue;
+                else
+                {
+                    var correctLink = MarkdownParsingUtils.ToCorrectLink(collectedValue);
+                    if (correctLink == null)
+                        throw new InvalidOperationException("Link is incorrect"); // should not happen
+                    var absoluteLink = IsRelativeLink(correctLink) ? GetAbsoluteLink(correctLink, baseUrl) : correctLink;
+                    AddProperty("href", absoluteLink);
+                }
+            }
+            else
+            {
+                Value = collectedValue;
+            }
+        }
+
+        private string GetAbsoluteLink(string relativeLink, string baseUrl)
+        {
+            if (baseUrl == null)
+                throw new InvalidOperationException("Base url was not specified.");
+            return MarkdownParsingUtils.CombineLinks(baseUrl, relativeLink);
+        }
+
+        private bool IsRelativeLink(string correctLink)
+        {
+            return correctLink.Length == 0 || correctLink[0] == '/';
         }
 
         public string GetCurrentRepresentation()
