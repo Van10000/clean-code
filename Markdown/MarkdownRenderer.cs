@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Markdown.MarkdownEnumerable;
@@ -26,6 +27,7 @@ namespace Markdown
         private readonly Stack<TagInfo> tagsStack = new Stack<TagInfo>();
 
         private readonly ITagsRepresentation representation;
+        private readonly string baseUrl;
 
         public static string RenderToHtml(string markdown)
         {
@@ -33,10 +35,11 @@ namespace Markdown
             return renderer.RenderToHtml();
         }
 
-        public MarkdownRenderer(IMarkdownEnumerable markdown, ITagsRepresentation representation)
+        public MarkdownRenderer(IMarkdownEnumerable markdown, ITagsRepresentation representation, string baseUrl = null)
         {
             this.markdown = markdown;
             this.representation = representation;
+            this.baseUrl = baseUrl;
         }
 
         public string RenderToHtml()
@@ -110,12 +113,24 @@ namespace Markdown
                                                     $"Given hypelink contains {hyperlinkParts.Length} parts.");
             var link = MarkdownParsingUtils.ToCorrectLink(hyperlinkParts[1]);
             if (link == null)
-                throw new NotImplementedException(); //TODO: should not happen, need to rewrite it somehow
+                throw new InvalidOperationException("Incorrect link"); // should not happen
             builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Opening)));
-            builderToAddResult.Append(hyperlinkParts[1]);
+            builderToAddResult.Append(IsRelativeLink(hyperlinkParts[1]) ? GetAbsoluteLink(hyperlinkParts[1]) : hyperlinkParts[1]);
             builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Middle)));
             builderToAddResult.Append(hyperlinkParts[0]);
             builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Closing)));
+        }
+
+        private string GetAbsoluteLink(string relativeLink)
+        {
+            if (baseUrl == null)
+                throw new InvalidOperationException("Base url was not specified.");
+            return MarkdownParsingUtils.CombineLinks(baseUrl, relativeLink);
+        }
+
+        private bool IsRelativeLink(string correctLink)
+        {
+            return correctLink.Length == 0 || correctLink[0] == '/';
         }
 
         private IEnumerable<TagInfo> GetCurrentStopTags()

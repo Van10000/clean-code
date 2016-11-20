@@ -73,6 +73,15 @@ namespace Markdown.MarkdownEnumerable
             return ToCorrectLink(link) != null;
         }
 
+        public static string CombineLinks(string baseLink, string relativePath)
+        {
+            var builder = new StringBuilder();
+            builder.Append(baseLink.LastOrDefault() == '/' ? baseLink.Substring(0, baseLink.Length - 1) : baseLink);
+            builder.Append('/');
+            builder.Append(relativePath.FirstOrDefault() == '/' ? relativePath.Substring(1) : relativePath);
+            return builder.ToString();
+        }
+
         /// <summary>
         /// Checks that hyperlink will be finished at some point.
         /// </summary>
