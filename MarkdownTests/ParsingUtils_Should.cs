@@ -34,5 +34,14 @@ namespace MarkdownTests
             var tagInfo = new TagInfo(tag, TagType.Closing);
             return MarkdownParsingUtils.IsCorrectTag(tagInfo, str, pos);
         }
+
+        [TestCase("yandex.ru", ExpectedResult = "yandex.ru", TestName = "Simple link")]
+        [TestCase("", ExpectedResult = "", TestName = "Empty link is also link")] // because of relative links
+        [TestCase(" ya.ru ", ExpectedResult = "ya.ru", TestName = "Spaces in the beginning and at the and.")]
+        [TestCase("ya. ru", ExpectedResult = null, TestName = "Incorrect link")]
+        public string Return_CorrectLink(string link)
+        {
+            return MarkdownParsingUtils.ToCorrectLink(link);
+        }
     }
 }

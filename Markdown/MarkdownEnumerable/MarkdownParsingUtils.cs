@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Markdown.MarkdownEnumerable
 {
@@ -30,7 +31,9 @@ namespace Markdown.MarkdownEnumerable
                 case Tag.Strong:
                     return IsCorrectUnderscoreTag(tagInfo, markdown, positionBeforeTagStart, positionAfterTagEnd);
                 case Tag.Hyperlink:
-                    return true;
+                    if (tagInfo.TagType == TagType.Opening)
+                        return IsHyperlinkStart(markdown, positionAfterTagEnd);
+                    return true; // It's not always true, but for algorithm it doesn't matter. We can check it here though, if we want.
                 default:
                     throw new ArgumentException($"Unknown tag:{tagInfo.Tag}");
             }
@@ -52,6 +55,60 @@ namespace Markdown.MarkdownEnumerable
                     throw new ArgumentException($"Unknown tag:{tag}");
             }
         }
+
+        public static string ToCorrectLink(string link)
+        {
+            var skippedSpaces = link
+                .SkipWhile(char.IsWhiteSpace)
+                .TakeWhile(ch => !char.IsWhiteSpace(ch))
+                .Aggregate(new StringBuilder(), (builder, ch) => builder.Append(ch))
+                .ToString();
+            if (skippedSpaces.Count(ch => !char.IsWhiteSpace(ch)) != link.Count(ch => !char.IsWhiteSpace(ch)))
+                return null;
+            return skippedSpaces;
+        }
+
+        public static bool IsCorrectLink(string link)
+        {
+            return ToCorrectLink(link) != null;
+        }
+
+        /// <summary>
+        /// Checks that hyperlink will be finished at some point.
+        /// </summary>
+        /// <param name="position">Position after '[' symbol</param>
+        /// <returns></returns>
+        private static bool IsHyperlinkStart(string markdown, int position)
+        {
+            var middleRepresentation = GetHyperlinkRepresentation(TagType.Middle);
+            for (var i = position; i <= markdown.Length - middleRepresentation.Length; ++i)
+                if (markdown.Substring(i, middleRepresentation.Length) == middleRepresentation)
+                    return IsHyperlinkMiddle(markdown, i + 2);
+            return false;
+        }
+
+        /// <summary>
+        /// Checks that hyperlink will be finished at some point.
+        /// </summary>
+        /// <param name="position">Position after "](" symbols</param>
+        /// <returns></returns>
+        private static bool IsHyperlinkMiddle(string markdown, int position)
+        {
+            var builder = new StringBuilder();
+            var endRepresentation = GetHyperlinkRepresentation(TagType.Closing);
+            Console.WriteLine("______");
+            for (var i = position; i <= markdown.Length - endRepresentation.Length; ++i)
+            {
+                Console.WriteLine(builder.ToString());
+                if (markdown.Substring(i, endRepresentation.Length) == endRepresentation)
+                    return IsCorrectLink(builder.ToString());
+                else
+                    builder.Append(markdown[i]);
+            }
+            return IsCorrectLink(builder.ToString()); // if not closed - we close it in the end
+        }
+
+        
 
         private static string GetHyperlinkRepresentation(TagType type)
         {

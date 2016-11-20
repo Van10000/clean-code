@@ -54,7 +54,7 @@
   <ItemGroup>
     <Compile Include="HtmlTagsRepresentation_Sholud.cs" />
     <Compile Include="MarkdownEnumerableExtensions_Should.cs" />
-    <Compile Include="MarkdownRenderingUtils_Should.cs" />
+    <Compile Include="MarkdownRenderer_Should.cs" />
     <Compile Include="ParsingUtils_Should.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringMarkdownEnumerable_Should.cs" />

@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace MarkdownTests
 {
     [TestFixture]
-    internal class MarkdownRenderingUtils_Should
+    internal class MarkdownRenderer_Should
     {
         [TestCase("ab _c_ de", "ab <em>c</em> de", TestName = "Simple italic tag")]
         [TestCase(@"\_a\_", "_a_", TestName = "Escape italic")]
@@ -23,10 +23,14 @@ namespace MarkdownTests
         [TestCase("__a _b", "<strong>a <em>b</em></strong>", TestName = "Not closed tags close in the end")]
         [TestCase("__a _b c__", "<strong>a <em>b c</em></strong>", TestName = "High level tag closes before low level")]
         [TestCase("[abc](ya.ru)", "<a href=\"ya.ru\">abc</a>", TestName = "Simple hyperlink")]
-        [TestCase("[a __b _c](ya.ru)", "<a href=\"ya.ru\">a <strong>b <em>c</em></strong></a>", TestName = "High level of nesting")]
+        [TestCase("[a _b_ c](ya.ru)", "<a href=\"ya.ru\">a <em>b</em> c</a>", TestName = "Tag inside hyperlink text")]
+        [TestCase("[a __b _c](ya.ru)", "<a href=\"ya.ru\">a <strong>b <em>c</em></strong></a>", TestName = "Unclosed low level tags close when met high level closing tag")]
+        [TestCase("[a](b c)", "[a](b c)", TestName = "Incorrect hyperlink stays simple text")]
+        [TestCase("[abc]( _b_ c)", "[abc]( <em>b</em> c)", TestName = "Tag inside incorrect link in hyperlink")]
+        [TestCase("[ab _c]( d_ e)", "[ab <em>c]( d</em> e)", TestName = "Tag inside incorrect text and link in hyperlink")]
         public void RenderToHtml(string markdown, string expectedHtmlResult)
         {
-            var htmlResult = MarkdownRenderingUtils.RenderToHtml(markdown);
+            var htmlResult = MarkdownRenderer.RenderToHtml(markdown);
 
             Console.WriteLine(htmlResult);
 
@@ -34,7 +38,7 @@ namespace MarkdownTests
         }
 
         [Test, Timeout(1000)]
-        public void RandomSpeedTest()
+        public void RenderFast_RandomString()
         {
             var charsCount = (int)1e5;
             var random = new Random(0);
@@ -50,11 +54,11 @@ namespace MarkdownTests
                     markdownBuilder.Append('a');
             }
 
-            MarkdownRenderingUtils.RenderToHtml(markdownBuilder.ToString());
+            MarkdownRenderer.RenderToHtml(markdownBuilder.ToString());
         }
 
         [Test, Timeout(2000)]
-        public void TenBigHighlights()
+        public void RenderFast_TenBigHighlights()
         {
             var charsCount = (int)1e5;
             var partsCount = 10;
@@ -66,7 +70,7 @@ namespace MarkdownTests
                 else
                     markdownBuilder.Append('a');
 
-            MarkdownRenderingUtils.RenderToHtml(markdownBuilder.ToString());
+            MarkdownRenderer.RenderToHtml(markdownBuilder.ToString());
         }
     }
 }

@@ -27,6 +27,12 @@ namespace Markdown
 
         private readonly ITagsRepresentation representation;
 
+        public static string RenderToHtml(string markdown)
+        {
+            var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), new HtmlTagsRepresentation());
+            return renderer.RenderToHtml();
+        }
+
         public MarkdownRenderer(IMarkdownEnumerable markdown, ITagsRepresentation representation)
         {
             this.markdown = markdown;
@@ -102,7 +108,7 @@ namespace Markdown
             if (hyperlinkParts.Length != 2)
                 throw new InvalidOperationException($"Hyperlink should contain exactly 2 parts. " +
                                                     $"Given hypelink contains {hyperlinkParts.Length} parts.");
-            var link = ToCorrectLink(hyperlinkParts[1]);
+            var link = MarkdownParsingUtils.ToCorrectLink(hyperlinkParts[1]);
             if (link == null)
                 throw new NotImplementedException(); //TODO: should not happen, need to rewrite it somehow
             builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Opening)));
@@ -110,18 +116,6 @@ namespace Markdown
             builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Middle)));
             builderToAddResult.Append(hyperlinkParts[0]);
             builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Closing)));
-        }
-        
-        private string ToCorrectLink(string link)
-        {
-            var skippedSpaces = link
-                .SkipWhile(char.IsWhiteSpace)
-                .TakeWhile(ch => !char.IsWhiteSpace(ch))
-                .Aggregate(new StringBuilder(), (builder, ch) => builder.Append(ch))
-                .ToString();
-            if (skippedSpaces.Count(char.IsWhiteSpace) != link.Count(char.IsWhiteSpace))
-                return null;
-            return skippedSpaces;
         }
 
         private IEnumerable<TagInfo> GetCurrentStopTags()
