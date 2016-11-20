@@ -1,5 +1,4 @@
-﻿using System;
-using Markdown.MarkdownEnumerable;
+﻿using Markdown.MarkdownEnumerable;
 using NUnit.Framework;
 
 namespace MarkdownTests
@@ -47,7 +46,7 @@ namespace MarkdownTests
         [TestCase("documents", "", ExpectedResult = "documents/", TestName = "Empty relative path")]
         [TestCase("a/b/c", "/d/e", ExpectedResult = "a/b/c/d/e", TestName = "Simple concatenation")]
         [TestCase("A/B/C", "D/E", ExpectedResult = "A/B/C/D/E", TestName = "Both strings without '/' at the end")]
-        [TestCase("a/b/c/", "/d/e/", ExpectedResult ="a/b/c/d/e/", TestName = "Both strings with '/' at the end")]
+        [TestCase("a/b/c/", "/d/e/", ExpectedResult = "a/b/c/d/e/", TestName = "Both strings with '/' at the end")]
         public string CombineLinks(string baseUrl, string relativePath)
         {
             return MarkdownParsingUtils.CombineLinks(baseUrl, relativePath);

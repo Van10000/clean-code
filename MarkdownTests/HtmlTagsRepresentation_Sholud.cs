@@ -10,15 +10,17 @@ namespace MarkdownTests
         private readonly HtmlTagsRepresentation representation = new HtmlTagsRepresentation();
 
         [TestCase(Tag.None, ExpectedResult = "")]
-        [TestCase(Tag.Italic, ExpectedResult = "<em>")]
-        [TestCase(Tag.Strong, ExpectedResult = "<strong>")]
-        [TestCase(Tag.Hyperlink, ExpectedResult = "<a href=\"")]
+        [TestCase(Tag.Italic, ExpectedResult = "<em")]
+        [TestCase(Tag.Strong, ExpectedResult = "<strong")]
+        [TestCase(Tag.Hyperlink, ExpectedResult = "<a")]
         public string ReturnRightOpeningTag(Tag tag)
         {
             return representation.GetRepresentation(new TagInfo(tag, TagType.Opening));
         }
 
-        [TestCase(Tag.Hyperlink, ExpectedResult = "\">")]
+        [TestCase(Tag.Italic, ExpectedResult = ">")]
+        [TestCase(Tag.Strong, ExpectedResult = ">")]
+        [TestCase(Tag.Hyperlink, ExpectedResult = ">")]
         public string ReturnRightMiddleTag(Tag tag)
         {
             return representation.GetRepresentation(new TagInfo(tag, TagType.Middle));

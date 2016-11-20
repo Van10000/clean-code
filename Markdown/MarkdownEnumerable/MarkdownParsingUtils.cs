@@ -105,10 +105,8 @@ namespace Markdown.MarkdownEnumerable
         {
             var builder = new StringBuilder();
             var endRepresentation = GetHyperlinkRepresentation(TagType.Closing);
-            Console.WriteLine("______");
             for (var i = position; i <= markdown.Length - endRepresentation.Length; ++i)
             {
-                Console.WriteLine(builder.ToString());
                 if (markdown.Substring(i, endRepresentation.Length) == endRepresentation)
                     return IsCorrectLink(builder.ToString());
                 else
@@ -117,7 +115,7 @@ namespace Markdown.MarkdownEnumerable
             return IsCorrectLink(builder.ToString()); // if not closed - we close it in the end
         }
 
-        
+
 
         private static string GetHyperlinkRepresentation(TagType type)
         {
@@ -136,7 +134,7 @@ namespace Markdown.MarkdownEnumerable
 
         private static bool IsCorrectUnderscoreTag(TagInfo tagInfo, string markdown, int positionBefore, int positionAfter)
         {
-            var positionsBeforeAndAfter = new[] {positionBefore, positionAfter};
+            var positionsBeforeAndAfter = new[] { positionBefore, positionAfter };
             if (IsAnySymbolAtAnyPosition(markdown, positionsBeforeAndAfter, Underscore + Digits))
                 return false;
 

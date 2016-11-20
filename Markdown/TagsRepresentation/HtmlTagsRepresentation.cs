@@ -1,61 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
 using Markdown.MarkdownEnumerable;
 
 namespace Markdown.TagsRepresentation
 {
     public class HtmlTagsRepresentation : ITagsRepresentation
     {
+        readonly Dictionary<Tag, string> htmlNames = new Dictionary<Tag, string>
+        {
+            { Tag.Italic, "em"},
+            { Tag.Strong, "strong"},
+            { Tag.Hyperlink, "a"}
+        };
+
         public string GetRepresentation(TagInfo tagInfo)
         {
-            if (tagInfo.Tag == Tag.Hyperlink)
-                return GetHyperlinkRepresentation(tagInfo.TagType);
+            if (tagInfo.Tag == Tag.None)
+                return "";
+
             switch (tagInfo.TagType)
             {
                 case TagType.Opening:
-                    return GetOpeningTag(tagInfo.Tag);
-                case TagType.Closing:
-                    return GetClosingTag(tagInfo.Tag);
-                default:
-                    throw new ArgumentException($"Unsupported tag type{tagInfo.TagType}");
-            }
-        }
-
-        private string GetHyperlinkRepresentation(TagType tagType)
-        {
-            switch (tagType)
-            {
-                case TagType.Opening:
-                    return "<a href=\"";
+                    return "<" + htmlNames[tagInfo.Tag];
                 case TagType.Middle:
-                    return "\">";
+                    return ">";
                 case TagType.Closing:
-                    return "</a>";
+                    return "</" + htmlNames[tagInfo.Tag] + ">";
                 default:
-                    throw new ArgumentException($"Unknown tag type:{tagType}");
+                    throw new ArgumentException($"Unknown tag type:{tagInfo.TagType}");
             }
-        }
-
-        private string GetOpeningTag(Tag tag)
-        {
-            switch (tag)
-            {
-                case Tag.Italic:
-                    return "<em>";
-                case Tag.Strong:
-                    return "<strong>";
-                case Tag.None:
-                    return "";
-                default:
-                    throw new ArgumentException($"Unknown tag:{tag}");
-            }
-        }
-
-        private string GetClosingTag(Tag tag)
-        {
-            if (tag == Tag.None)
-                return "";
-            var openingTag = GetOpeningTag(tag);
-            return openingTag.Insert(1, "/");
         }
     }
 }

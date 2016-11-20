@@ -41,7 +41,16 @@ namespace MarkdownTests
         public string RenderHyperlinksWithRelativePaths(string markdown, string baseUrl)
         {
             var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), new HtmlTagsRepresentation(), baseUrl);
-            
+
+            return renderer.RenderToHtml();
+        }
+
+        [TestCase("_a_ __b__ [c](d.ru)", "a.css", 
+            ExpectedResult = "<em class=\"a.css\">a</em> <strong class=\"a.css\">b</strong> <a href=\"d.ru\" class=\"a.css\">c</a>")]
+        public string RenderToHtmlWithCssClass(string markdown, string className)
+        {
+            var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), new HtmlTagsRepresentation(), cssClass: className);
+
             return renderer.RenderToHtml();
         }
 

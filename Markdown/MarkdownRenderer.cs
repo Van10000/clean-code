@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Text;
 using Markdown.MarkdownEnumerable;
@@ -23,11 +21,18 @@ namespace Markdown
             {new TagInfo(Tag.Strong, TagType.Opening), new[] {Tag.Italic}}
         };
 
-        private readonly Stack<List<StringBuilder>> renderedParts = new Stack<List<StringBuilder>>();
-        private readonly Stack<TagInfo> tagsStack = new Stack<TagInfo>();
+        private readonly Stack<TagType> tagsStack = new Stack<TagType>();
+        private readonly Stack<StringBuilder> renderedParts = new Stack<StringBuilder>();
+        private readonly Stack<ParsedTag> renderedTags = new Stack<ParsedTag>();
 
         private readonly ITagsRepresentation representation;
         private readonly string baseUrl;
+        private readonly string cssClass;
+
+        private IEnumerable<TagInfo> TagInfosStack
+            => tagsStack.Zip(renderedTags.Select(parsedTag => parsedTag.Tag), (tagType, tag) => new TagInfo(tag, tagType));
+
+        private TagInfo CurrentTagInfo => new TagInfo(renderedTags.Peek().Tag, tagsStack.Peek());
 
         public static string RenderToHtml(string markdown)
         {
@@ -35,90 +40,86 @@ namespace Markdown
             return renderer.RenderToHtml();
         }
 
-        public MarkdownRenderer(IMarkdownEnumerable markdown, ITagsRepresentation representation, string baseUrl = null)
+        public MarkdownRenderer(IMarkdownEnumerable markdown, ITagsRepresentation representation,
+            string baseUrl = null, string cssClass = null)
         {
             this.markdown = markdown;
             this.representation = representation;
             this.baseUrl = baseUrl;
+            this.cssClass = cssClass;
         }
 
         public string RenderToHtml()
         {
             ClearState();
-            AddInitialStateToStacks();
+            PushTag(TagInfo.None);
 
             while (true)
             {
-                var currentBuilder = GetCurrentRenderedPartBuilder();
+                var currentBuilder = renderedParts.Peek();
                 var stopTags = GetCurrentStopTags();
 
                 TagInfo stoppedAt;
                 var parsedPart = markdown.ParseUntil(stopTags, out stoppedAt);
                 currentBuilder.Append(parsedPart);
+
                 if (ShouldCloseTag(stoppedAt.TagType))
                 {
-                    if (renderedParts.Count == 1)
-                        return GetTopLevelResult();
-                    if (GetLastTagStopTags().Contains(stoppedAt))
-                        CloseTopLevelTag();
-                    else while (tagsStack.Peek().GetOfNextType() != stoppedAt) // in case we closed tag at higher level
-                        CloseTopLevelTag();
+                    CloseLowerLevelsOfTags(stoppedAt);
+                    if (tagsStack.Count == 1)
+                        return renderedParts.Peek().ToString();
+                    CloseTopLevelTag();
                 }
                 else if (stoppedAt.TagType == TagType.Middle)
                 {
-                    while (tagsStack.Peek().GetOfNextType() != stoppedAt) // in case we closed tag at higher level
-                        CloseTopLevelTag();
-                    renderedParts.Peek().Add(new StringBuilder());
+                    CloseLowerLevelsOfTags(stoppedAt);
+                    AddCurrentValueToParsedTag();
                     tagsStack.Pop();
-                    tagsStack.Push(stoppedAt);
+                    tagsStack.Push(stoppedAt.TagType);
+                    renderedParts.Pop();
+                    renderedParts.Push(new StringBuilder());
                 }
                 else
                 {
-                    AddTopLevelStringBuilder();
-                    tagsStack.Push(stoppedAt);
+                    PushTag(stoppedAt);
                 }
             }
         }
 
-        private string GetTopLevelResult()
-        { 
-            var currentList = renderedParts.Pop();
-            AddTopLevelStringBuilder();
-            renderedParts.Push(currentList);
-            CloseTopLevelTag();
-            return renderedParts.Pop().Last().ToString();
+        private void AddCurrentValueToParsedTag()
+        {
+            var currentTag = CurrentTagInfo;
+            var collectedValue = renderedParts.Peek().ToString();
+            if (currentTag.Tag == Tag.Hyperlink)
+            {
+                if (currentTag.TagType == TagType.Opening)
+                    renderedTags.Peek().Value = collectedValue;
+                else
+                {
+                    var correctLink = MarkdownParsingUtils.ToCorrectLink(collectedValue);
+                    if (correctLink == null)
+                        throw new InvalidOperationException("Link is incorrect"); // should not happen
+                    var absoluteLink = IsRelativeLink(correctLink) ? GetAbsoluteLink(correctLink) : correctLink;
+                    renderedTags.Peek().AddProperty("href", absoluteLink);
+                }
+            }
+            else
+            {
+                renderedTags.Peek().Value = collectedValue;
+            }
+        }
+
+        private void CloseLowerLevelsOfTags(TagInfo stoppedAt)
+        {
+            while (CurrentTagInfo.GetOfNextType() != stoppedAt)
+                CloseTopLevelTag();
         }
 
         private void CloseTopLevelTag()
         {
-            var currentList = renderedParts.Peek();
-            renderedParts.Pop();
-            var nextLevelBuilder = GetCurrentRenderedPartBuilder();
-            if (tagsStack.Peek().Tag == Tag.Hyperlink)
-            {
-                tagsStack.Pop();
-                var hyperlinkParts = currentList
-                    .Select(builder => builder.ToString())
-                    .ToArray();
-                WrapHyperlinkIntoTag(nextLevelBuilder, hyperlinkParts);
-            }
-            else
-                WrapIntoTag(nextLevelBuilder, currentList.Last().ToString(), tagsStack.Pop().Tag);
-        }
-
-        private void WrapHyperlinkIntoTag(StringBuilder builderToAddResult, string[] hyperlinkParts)
-        {
-            if (hyperlinkParts.Length != 2)
-                throw new InvalidOperationException($"Hyperlink should contain exactly 2 parts. " +
-                                                    $"Given hypelink contains {hyperlinkParts.Length} parts.");
-            var link = MarkdownParsingUtils.ToCorrectLink(hyperlinkParts[1]);
-            if (link == null)
-                throw new InvalidOperationException("Incorrect link"); // should not happen
-            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Opening)));
-            builderToAddResult.Append(IsRelativeLink(hyperlinkParts[1]) ? GetAbsoluteLink(hyperlinkParts[1]) : hyperlinkParts[1]);
-            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Middle)));
-            builderToAddResult.Append(hyperlinkParts[0]);
-            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(Tag.Hyperlink, TagType.Closing)));
+            AddCurrentValueToParsedTag();
+            var rendered = PopTag();
+            renderedParts.Peek().Append(rendered);
         }
 
         private string GetAbsoluteLink(string relativeLink)
@@ -137,22 +138,15 @@ namespace Markdown
         {
             foreach (var tag in GetLastTagStopTags())
                 yield return tag;
-            foreach (var tag in tagsStack)
+            foreach (var tag in TagInfosStack)
                 yield return tag.GetOfNextType(); // higher level tags
         }
 
         private IEnumerable<TagInfo> GetLastTagStopTags()
         {
-            foreach (var tag in tagsInside[tagsStack.Peek()])
+            foreach (var tag in tagsInside[CurrentTagInfo])
                 yield return new TagInfo(tag, TagType.Opening);
-            yield return tagsStack.Peek().GetOfNextType();
-        }
-
-        private void WrapIntoTag(StringBuilder builderToAddResult, string str, Tag tag)
-        {
-            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(tag, TagType.Opening)));
-            builderToAddResult.Append(str);
-            builderToAddResult.Append(representation.GetRepresentation(new TagInfo(tag, TagType.Closing)));
+            yield return CurrentTagInfo.GetOfNextType();
         }
 
         private bool ShouldCloseTag(TagType tagType)
@@ -160,26 +154,27 @@ namespace Markdown
             return tagType == TagType.Closing || tagType == TagType.None; // none if markdown finished
         }
 
-        private StringBuilder GetCurrentRenderedPartBuilder()
-        {
-            return renderedParts.Peek().Last();
-        }
-
         private void ClearState()
         {
             tagsStack.Clear();
             renderedParts.Clear();
+            renderedTags.Clear();
         }
 
-        private void AddInitialStateToStacks()
+        private void PushTag(TagInfo tagInfo)
         {
-            tagsStack.Push(TagInfo.None);
-            AddTopLevelStringBuilder();
+            tagsStack.Push(tagInfo.TagType);
+            renderedTags.Push(new ParsedTag(tagInfo.Tag, representation));
+            renderedParts.Push(new StringBuilder());
         }
 
-        private void AddTopLevelStringBuilder()
+        private string PopTag()
         {
-            renderedParts.Push(new List<StringBuilder> { new StringBuilder() });
+            tagsStack.Pop();
+            renderedParts.Pop();
+            if (cssClass != null)
+                renderedTags.Peek().AddProperty("class", cssClass);
+            return renderedTags.Pop().GetCurrentRepresentation();
         }
     }
 }
