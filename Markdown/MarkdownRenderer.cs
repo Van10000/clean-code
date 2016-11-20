@@ -88,7 +88,7 @@ namespace Markdown
 
         private void AddCurrentValueToParsedTag()
         {
-            parsedTags.Peek().AddValueOrProperty(renderedParts.ToString(), tagsStack.Peek(), baseUrl);
+            parsedTags.Peek().AddValueOrProperty(renderedParts.Peek().ToString(), tagsStack.Peek(), baseUrl);
         }
 
         private void CloseLowerLevelsOfTags(TagInfo stoppedAt)
