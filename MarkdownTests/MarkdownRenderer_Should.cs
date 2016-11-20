@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using FluentAssertions;
 using Markdown;
 using Markdown.MarkdownEnumerable;
 using Markdown.TagsRepresentation;
