@@ -63,9 +63,9 @@ namespace MarkdownTests
         {
             var tags = new[]
             {
-                new TagInfo(Tag.Strong, TagPosition.Opening, 0),
-                new TagInfo(Tag.Strong, TagPosition.Closing, 0),
-                new TagInfo(Tag.Italic, TagPosition.Opening, 0)
+                new SimpleTagInfo(Tag.Strong, TagPosition.Opening),
+                new SimpleTagInfo(Tag.Strong, TagPosition.Closing),
+                new SimpleTagInfo(Tag.Italic, TagPosition.Opening)
             };
             var markdownEnumerable = new StringMarkdownEnumerable("a_ __b");
 
@@ -91,7 +91,7 @@ namespace MarkdownTests
         private StringMarkdownEnumerable ParseUntil(string markdown, Tag tag, TagType tagPosition, out TagInfo stoppedAt)
         {
             var markdownEnumerable = new StringMarkdownEnumerable(markdown);
-            var tagInfo = new TagInfo(tag, tagPosition);
+            var tagInfo = TagInfo.Create(tag, tagPosition);
 
             markdownEnumerable.ParseUntil(new[] { tagInfo }, out stoppedAt);
 

@@ -35,7 +35,7 @@ namespace MarkdownTests
         {
             var markdownEnumerable = new StringMarkdownEnumerable(markdown);
             markdownEnumerable.SkipCharacters(position);
-            var expectedTagInfo = new TagInfo(expectedTag, new TagType(expectedPosition, expectedPart));
+            var expectedTagInfo = TagInfo.Create(expectedTag, new TagType(expectedPosition, expectedPart));
 
             var returnedTagInfo = markdownEnumerable.GetNextTag(new[] { expectedTagInfo });
 

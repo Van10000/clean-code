@@ -65,7 +65,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MarkdownEnumerable\Tags\HyperlinkTagConstants.cs" />
+    <Compile Include="MarkdownEnumerable\Tags\HyperlinkTagInfo.cs" />
+    <Compile Include="MarkdownEnumerable\Tags\SimpleTagInfo.cs" />
     <Compile Include="MarkdownEnumerable\Tags\Tag.cs" />
     <Compile Include="MarkdownEnumerable\Tags\TagPosition.cs" />
     <Compile Include="MarkdownEnumerable\Tags\TagInfo.cs" />

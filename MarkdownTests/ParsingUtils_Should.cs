@@ -19,10 +19,10 @@ namespace MarkdownTests
         [TestCase(Tag.Strong, 0, "2__", 1, ExpectedResult = false, TestName = "Tag after number")]
         [TestCase(Tag.Italic, 0, "a_a_a", 1, ExpectedResult = false, TestName = "Tag between non space symbols")]
         [TestCase(Tag.Italic, 0, "__a__", 4, ExpectedResult = false, TestName = "Italic near to _")]
-        [TestCase(Tag.Hyperlink, HyperlinkTagConstants.VALUE_PART, "[a](b)", 0, ExpectedResult = true, TestName = "Simple hyperlink start")]
+        [TestCase(Tag.Hyperlink, HyperlinkTagInfo.VALUE_PART, "[a](b)", 0, ExpectedResult = true, TestName = "Simple hyperlink start")]
         public bool DetectOpeningTag(Tag tag, int tagPart, string str, int pos)
         {
-            var tagInfo = new TagInfo(tag, new TagType(TagPosition.Opening, tagPart));
+            var tagInfo = TagInfo.Create(tag, new TagType(TagPosition.Opening, tagPart));
             return MarkdownParsingUtils.IsCorrectTag(tagInfo, str, pos);
         }
 
@@ -32,7 +32,7 @@ namespace MarkdownTests
         [TestCase(Tag.Italic, 0, "a_ b", 1, ExpectedResult = true, TestName = "Gap in another side")]
         public bool DetectClosingTag(Tag tag, int tagPart, string str, int pos)
         {
-            var tagInfo = new TagInfo(tag, new TagType(TagPosition.Closing, tagPart));
+            var tagInfo = TagInfo.Create(tag, new TagType(TagPosition.Closing, tagPart));
             return MarkdownParsingUtils.IsCorrectTag(tagInfo, str, pos);
         }
 

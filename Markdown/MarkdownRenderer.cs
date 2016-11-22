@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Markdown.MarkdownEnumerable;
@@ -17,10 +15,10 @@ namespace Markdown
         private readonly Dictionary<TagInfo, Tag[]> tagsInside = new Dictionary<TagInfo, Tag[]>
         {
             {TagInfo.None, new[] {Tag.Strong, Tag.Italic, Tag.Hyperlink}},
-            {new TagInfo(Tag.Hyperlink, TagPosition.Opening, HyperlinkTagConstants.VALUE_PART), new[] {Tag.Strong, Tag.Italic}},
-            {new TagInfo(Tag.Hyperlink, TagPosition.Opening, HyperlinkTagConstants.LINK_PART), new Tag[0] },
-            {new TagInfo(Tag.Italic, TagPosition.Opening, 0), new Tag[0]},
-            {new TagInfo(Tag.Strong, TagPosition.Opening, 0), new[] {Tag.Italic}}
+            {new HyperlinkTagInfo(TagPosition.Opening, HyperlinkTagInfo.VALUE_PART), new[] {Tag.Strong, Tag.Italic}},
+            {new HyperlinkTagInfo(TagPosition.Opening, HyperlinkTagInfo.LINK_PART), new Tag[0] },
+            {new SimpleTagInfo(Tag.Italic, TagPosition.Opening), new Tag[0]},
+            {new SimpleTagInfo(Tag.Strong, TagPosition.Opening), new[] {Tag.Italic}}
         };
 
         private readonly Stack<TagType> tagsStack = new Stack<TagType>();
@@ -31,9 +29,9 @@ namespace Markdown
         private readonly string cssClass;
 
         private IEnumerable<TagInfo> TagInfosStack
-            => tagsStack.Zip(parsedTags.Select(parsedTag => parsedTag.Tag), (tagType, tag) => new TagInfo(tag, tagType));
+            => tagsStack.Zip(parsedTags.Select(parsedTag => parsedTag.Tag), (tagType, tag) => TagInfo.Create(tag, tagType));
 
-        private TagInfo CurrentTagInfo => new TagInfo(parsedTags.Peek().Tag, tagsStack.Peek());
+        private TagInfo CurrentTagInfo => TagInfo.Create(parsedTags.Peek().Tag, tagsStack.Peek());
 
         public static string RenderToHtml(string markdown)
         {
@@ -119,7 +117,7 @@ namespace Markdown
         private IEnumerable<TagInfo> GetLastTagStopTags()
         {
             foreach (var tag in tagsInside[CurrentTagInfo])
-                yield return new TagInfo(tag, TagType.FirstOpeningTag);
+                yield return TagInfo.Create(tag, TagType.FirstOpeningTag);
             yield return CurrentTagInfo.GetOfNextType();
         }
 

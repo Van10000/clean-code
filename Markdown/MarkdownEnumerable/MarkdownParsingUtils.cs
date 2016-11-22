@@ -90,11 +90,11 @@ namespace Markdown.MarkdownEnumerable
         /// <returns></returns>
         private static bool IsHyperlinkStart(string markdown, int position)
         {
-            var closingTag = GetHyperlinkRepresentation(new TagType(TagPosition.Closing, HyperlinkTagConstants.VALUE_PART));
+            var closingTag = GetHyperlinkRepresentation(new TagType(TagPosition.Closing, HyperlinkTagInfo.VALUE_PART));
             for (var i = position; i <= markdown.Length - closingTag.Length; ++i)
                 if (markdown.Substring(i, closingTag.Length) == closingTag)
                 {
-                    var openingSecondPartTag = GetHyperlinkRepresentation(new TagType(TagPosition.Opening, HyperlinkTagConstants.LINK_PART));
+                    var openingSecondPartTag = GetHyperlinkRepresentation(new TagType(TagPosition.Opening, HyperlinkTagInfo.LINK_PART));
                     if (i + openingSecondPartTag.Length >= markdown.Length || 
                         markdown.Substring(i + 1, openingSecondPartTag.Length) != openingSecondPartTag)
                         return false;
@@ -111,7 +111,7 @@ namespace Markdown.MarkdownEnumerable
         private static bool IsHyperlinkSecondPart(string markdown, int position)
         {
             var builder = new StringBuilder();
-            var endRepresentation = GetHyperlinkRepresentation(new TagType(TagPosition.Closing, HyperlinkTagConstants.LINK_PART));
+            var endRepresentation = GetHyperlinkRepresentation(new TagType(TagPosition.Closing, HyperlinkTagInfo.LINK_PART));
             for (var i = position; i <= markdown.Length - endRepresentation.Length; ++i)
             {
                 if (markdown.Substring(i, endRepresentation.Length) == endRepresentation)
@@ -129,9 +129,9 @@ namespace Markdown.MarkdownEnumerable
             switch (tagType.TagPosition)
             {
                 case TagPosition.Opening:
-                    return tagType.TagPart == HyperlinkTagConstants.VALUE_PART ? "[" : "(";
+                    return tagType.TagPart == HyperlinkTagInfo.VALUE_PART ? "[" : "(";
                 case TagPosition.Closing:
-                    return tagType.TagPart == HyperlinkTagConstants.VALUE_PART ? "]" : ")";
+                    return tagType.TagPart == HyperlinkTagInfo.VALUE_PART ? "]" : ")";
                 default:
                     throw new ArgumentException($"Unknown tag type:{tagType.TagPosition}");
             }

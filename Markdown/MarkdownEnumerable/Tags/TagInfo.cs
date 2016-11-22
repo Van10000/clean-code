@@ -2,45 +2,55 @@
 
 namespace Markdown.MarkdownEnumerable.Tags
 {
-    public class TagInfo
+    public abstract class TagInfo
     {
-        public static TagInfo None => new TagInfo(Tag.None, TagPosition.None, 0);
+        public static TagInfo None => Create(Tag.None, TagPosition.None, 0);
 
         public readonly Tag Tag;
         public readonly TagType TagType;
 
         public TagPosition TagPosition => TagType.TagPosition;
         public int TagPart => TagType.TagPart;
-        public int MaximalPossiblePartsCount => Tag == Tag.Hyperlink ? 2 : 1;
+        public abstract int MaximalPossiblePartsCount { get; }
 
         public bool IsOpening() => TagPosition == TagPosition.Opening;
         public bool IsClosing() => TagPosition == TagPosition.Closing;
+        public bool IsNone() => this == None;
 
         public bool IsNotLastPartOfTag() => TagPart < MaximalPossiblePartsCount - 1;
 
-        public TagInfo(Tag tag, TagPosition tagPosition, int tagPart)
+        protected TagInfo(Tag tag, TagPosition tagPosition, int tagPart)
         {
             Tag = tag;
             TagType = new TagType(tagPosition, tagPart);
         }
 
-        public TagInfo(Tag tag, TagType tagType)
+        protected TagInfo(Tag tag, TagType tagType)
         {
             Tag = tag;
             TagType = tagType;
         }
 
-        public bool IsNone()
-            => this == None;
+        public static TagInfo Create(Tag tag, TagPosition tagPosition, int tagPart)
+        {
+            return Create(tag, new TagType(tagPosition, tagPart));
+        }
+
+        public static TagInfo Create(Tag tag, TagType tagType)
+        {
+            if (tag == Tag.Hyperlink)
+                return new HyperlinkTagInfo(tagType);
+            return new SimpleTagInfo(tag, tagType.TagPosition);
+        }
 
         public TagInfo GetOfNextType()
         {
             if (IsNone())
                 return None;
             if (TagPosition == TagPosition.Opening)
-                return new TagInfo(Tag, TagPosition.Closing, TagPart);
+                return Create(Tag, TagPosition.Closing, TagPart);
             else if (TagPart < MaximalPossiblePartsCount - 1)
-                return new TagInfo(Tag, TagPosition.Opening, TagPart + 1);
+                return Create(Tag, TagPosition.Opening, TagPart + 1);
             throw new InvalidOperationException("There is no next tag after closing tag.");
         }
 

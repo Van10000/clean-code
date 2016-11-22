@@ -35,7 +35,7 @@ namespace Markdown.TagsRepresentation
             var collectedValue = valueOrProperty;
             if (Tag == Tag.Hyperlink)
             {
-                if (tagType.TagPart == HyperlinkTagConstants.VALUE_PART)
+                if (tagType.TagPart == HyperlinkTagInfo.VALUE_PART)
                     Value = collectedValue;
                 else
                 {
