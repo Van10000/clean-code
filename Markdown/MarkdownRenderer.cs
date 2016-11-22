@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Markdown.MarkdownEnumerable;
+using Markdown.MarkdownEnumerable.Tags;
 using Markdown.TagsRepresentation;
 
 namespace Markdown
@@ -15,17 +17,16 @@ namespace Markdown
         private readonly Dictionary<TagInfo, Tag[]> tagsInside = new Dictionary<TagInfo, Tag[]>
         {
             {TagInfo.None, new[] {Tag.Strong, Tag.Italic, Tag.Hyperlink}},
-            {new TagInfo(Tag.Hyperlink, TagType.Opening), new[] {Tag.Strong, Tag.Italic}},
-            {new TagInfo(Tag.Hyperlink, TagType.Middle), new Tag[0] },
-            {new TagInfo(Tag.Italic, TagType.Opening), new Tag[0]},
-            {new TagInfo(Tag.Strong, TagType.Opening), new[] {Tag.Italic}}
+            {new TagInfo(Tag.Hyperlink, TagPosition.Opening, HyperlinkTagConstants.VALUE_PART), new[] {Tag.Strong, Tag.Italic}},
+            {new TagInfo(Tag.Hyperlink, TagPosition.Opening, HyperlinkTagConstants.LINK_PART), new Tag[0] },
+            {new TagInfo(Tag.Italic, TagPosition.Opening, 0), new Tag[0]},
+            {new TagInfo(Tag.Strong, TagPosition.Opening, 0), new[] {Tag.Italic}}
         };
 
         private readonly Stack<TagType> tagsStack = new Stack<TagType>();
         private readonly Stack<StringBuilder> renderedParts = new Stack<StringBuilder>();
         private readonly Stack<ParsedTag> parsedTags = new Stack<ParsedTag>();
-
-        private readonly ITagsRepresentation representation;
+        
         private readonly string baseUrl;
         private readonly string cssClass;
 
@@ -36,15 +37,13 @@ namespace Markdown
 
         public static string RenderToHtml(string markdown)
         {
-            var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), new HtmlTagsRepresentation());
+            var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown));
             return renderer.RenderToHtml();
         }
 
-        public MarkdownRenderer(IMarkdownEnumerable markdown, ITagsRepresentation representation,
-            string baseUrl = null, string cssClass = null)
+        public MarkdownRenderer(IMarkdownEnumerable markdown, string baseUrl = null, string cssClass = null)
         {
             this.markdown = markdown;
-            this.representation = representation;
             this.baseUrl = baseUrl;
             this.cssClass = cssClass;
         }
@@ -63,21 +62,12 @@ namespace Markdown
                 var parsedPart = markdown.ParseUntil(stopTags, out stoppedAt);
                 currentBuilder.Append(parsedPart);
 
-                if (ShouldCloseTag(stoppedAt.TagType))
+                if (ShouldCloseTag(stoppedAt.TagPosition))
                 {
                     CloseLowerLevelsOfTags(stoppedAt);
                     if (tagsStack.Count == 1)
                         return renderedParts.Peek().ToString();
                     CloseTopLevelTag();
-                }
-                else if (stoppedAt.TagType == TagType.Middle)
-                {
-                    CloseLowerLevelsOfTags(stoppedAt);
-                    AddCurrentValueToParsedTag();
-                    tagsStack.Pop();
-                    tagsStack.Push(stoppedAt.TagType);
-                    renderedParts.Pop();
-                    renderedParts.Push(new StringBuilder());
                 }
                 else
                 {
@@ -85,7 +75,7 @@ namespace Markdown
                 }
             }
         }
-
+        
         private void AddCurrentValueToParsedTag()
         {
             parsedTags.Peek().AddValueOrProperty(renderedParts.Peek().ToString(), tagsStack.Peek(), baseUrl);
@@ -100,8 +90,22 @@ namespace Markdown
         private void CloseTopLevelTag()
         {
             AddCurrentValueToParsedTag();
-            var rendered = PopTag();
-            renderedParts.Peek().Append(rendered);
+            var closingTagInfo = CurrentTagInfo.GetOfNextType();
+
+            if (closingTagInfo.IsNotLastPartOfTag())
+            {
+                TagInfo nextStoppedAt;
+                markdown.ParseUntil(new[] { closingTagInfo.GetOfNextType() }, out nextStoppedAt);
+                tagsStack.Pop();
+                tagsStack.Push(nextStoppedAt.TagType);
+                renderedParts.Pop();
+                renderedParts.Push(new StringBuilder());
+            }
+            else
+            {
+                var rendered = PopTag();
+                renderedParts.Peek().Append(rendered);
+            }
         }
 
         private IEnumerable<TagInfo> GetCurrentStopTags()
@@ -115,13 +119,13 @@ namespace Markdown
         private IEnumerable<TagInfo> GetLastTagStopTags()
         {
             foreach (var tag in tagsInside[CurrentTagInfo])
-                yield return new TagInfo(tag, TagType.Opening);
+                yield return new TagInfo(tag, TagType.FirstOpeningTag);
             yield return CurrentTagInfo.GetOfNextType();
         }
 
-        private bool ShouldCloseTag(TagType tagType)
+        private bool ShouldCloseTag(TagPosition tagType)
         {
-            return tagType == TagType.Closing || tagType == TagType.None; // none if markdown finished
+            return tagType == TagPosition.Closing || tagType == TagPosition.None; // none if markdown finished
         }
 
         private void ClearState()
@@ -134,7 +138,7 @@ namespace Markdown
         private void PushTag(TagInfo tagInfo)
         {
             tagsStack.Push(tagInfo.TagType);
-            parsedTags.Push(new ParsedTag(tagInfo.Tag, representation));
+            parsedTags.Push(new ParsedTag(tagInfo.Tag));
             renderedParts.Push(new StringBuilder());
         }
 

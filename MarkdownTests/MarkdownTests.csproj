@@ -52,7 +52,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HtmlTagsRepresentation_Sholud.cs" />
     <Compile Include="MarkdownEnumerableExtensions_Should.cs" />
     <Compile Include="MarkdownRenderer_Should.cs" />
     <Compile Include="ParsedTag_Should.cs" />

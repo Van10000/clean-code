@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Markdown.MarkdownEnumerable;
+using Markdown.MarkdownEnumerable.Tags;
 using Markdown.TagsRepresentation;
 using NUnit.Framework;
 
@@ -11,7 +12,7 @@ namespace MarkdownTests
         [TestCase("text", Tag.Hyperlink, ExpectedResult = "<a>text</a>", TestName = "Hyperlink tag without link")]
         public string ReturnCorrectRepresentation_WithNoProperties(string value, Tag tag)
         {
-            var parsedTag = new ParsedTag(tag, new HtmlTagsRepresentation());
+            var parsedTag = new ParsedTag(tag);
             parsedTag.Value = value;
             return parsedTag.GetCurrentRepresentation();
         }
@@ -19,7 +20,7 @@ namespace MarkdownTests
         [Test]
         public void ReturnCorrectHyperlinkRepresentation()
         {
-            var parsedTag = new ParsedTag(Tag.Hyperlink, new HtmlTagsRepresentation());
+            var parsedTag = new ParsedTag(Tag.Hyperlink);
             parsedTag.Value = "some_text";
             parsedTag.AddProperty("href", "ya.ru");
             var expectedResult = "<a href=\"ya.ru\">some_text</a>";

@@ -2,6 +2,7 @@
 using Markdown.MarkdownEnumerable;
 using NUnit.Framework;
 using FluentAssertions;
+using Markdown.MarkdownEnumerable.Tags;
 
 namespace MarkdownTests
 {
@@ -22,18 +23,19 @@ namespace MarkdownTests
             allChars.ToString().Should().Be(markdown.Replace(@"\", ""));
         }
 
-        [TestCase("e__", 1, Tag.Strong, TagType.Closing)]
-        [TestCase(" f_ d ", 2, Tag.Italic, TagType.Closing)]
-        [TestCase("", 0, Tag.None, TagType.None)]
-        [TestCase("sadfasrw", 5, Tag.None, TagType.None)]
-        [TestCase(" __c__ ", 1, Tag.Strong, TagType.Opening)]
-        [TestCase("_", 0, Tag.Italic, TagType.Opening)]
-        [TestCase("asdb wer", 2, Tag.None, TagType.None)]
-        public void AtSpecifiedPosition_FindNextClosingTag(string markdown, int position, Tag expectedTag, TagType expectedType)
+        [TestCase("e__", 1, Tag.Strong, TagPosition.Closing, 0)]
+        [TestCase(" f_ d ", 2, Tag.Italic, TagPosition.Closing, 0)]
+        [TestCase("", 0, Tag.None, TagPosition.None, 0)]
+        [TestCase("sadfasrw", 5, Tag.None, TagPosition.None, 0)]
+        [TestCase(" __c__ ", 1, Tag.Strong, TagPosition.Opening, 0)]
+        [TestCase("_", 0, Tag.Italic, TagPosition.Opening, 0)]
+        [TestCase("asdb wer", 2, Tag.None, TagPosition.None, 0)]
+        public void AtSpecifiedPosition_FindNextTag(string markdown, int position, Tag expectedTag, 
+            TagPosition expectedPosition, int expectedPart)
         {
             var markdownEnumerable = new StringMarkdownEnumerable(markdown);
             markdownEnumerable.SkipCharacters(position);
-            var expectedTagInfo = new TagInfo(expectedTag, expectedType);
+            var expectedTagInfo = new TagInfo(expectedTag, new TagType(expectedPosition, expectedPart));
 
             var returnedTagInfo = markdownEnumerable.GetNextTag(new[] { expectedTagInfo });
 

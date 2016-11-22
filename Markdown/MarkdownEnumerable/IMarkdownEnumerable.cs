@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Markdown.MarkdownEnumerable.Tags;
 
 namespace Markdown.MarkdownEnumerable
 {

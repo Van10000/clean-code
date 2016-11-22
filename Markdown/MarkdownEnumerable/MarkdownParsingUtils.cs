@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Markdown.MarkdownEnumerable.Tags;
 
 namespace Markdown.MarkdownEnumerable
 {
@@ -13,7 +14,7 @@ namespace Markdown.MarkdownEnumerable
 
         public static bool IsCorrectTag(TagInfo tagInfo, string markdown, int position)
         {
-            if (tagInfo.Tag == Tag.None || tagInfo.TagType == TagType.None)
+            if (tagInfo.Tag == Tag.None || tagInfo.TagPosition == TagPosition.None)
                 return false;
 
             var tagRepresentation = GetTagRepresentation(tagInfo);
@@ -31,7 +32,7 @@ namespace Markdown.MarkdownEnumerable
                 case Tag.Strong:
                     return IsCorrectUnderscoreTag(tagInfo, markdown, positionBeforeTagStart, positionAfterTagEnd);
                 case Tag.Hyperlink:
-                    if (tagInfo.TagType == TagType.Opening)
+                    if (tagInfo.TagPosition == TagPosition.Opening && tagInfo.TagPart == 0)
                         return IsHyperlinkStart(markdown, positionAfterTagEnd);
                     return true; // It's not always true, but for algorithm it doesn't matter. We can check it here though, if we want.
                 default:
@@ -89,10 +90,16 @@ namespace Markdown.MarkdownEnumerable
         /// <returns></returns>
         private static bool IsHyperlinkStart(string markdown, int position)
         {
-            var middleRepresentation = GetHyperlinkRepresentation(TagType.Middle);
-            for (var i = position; i <= markdown.Length - middleRepresentation.Length; ++i)
-                if (markdown.Substring(i, middleRepresentation.Length) == middleRepresentation)
-                    return IsHyperlinkMiddle(markdown, i + 2);
+            var closingTag = GetHyperlinkRepresentation(new TagType(TagPosition.Closing, HyperlinkTagConstants.VALUE_PART));
+            for (var i = position; i <= markdown.Length - closingTag.Length; ++i)
+                if (markdown.Substring(i, closingTag.Length) == closingTag)
+                {
+                    var openingSecondPartTag = GetHyperlinkRepresentation(new TagType(TagPosition.Opening, HyperlinkTagConstants.LINK_PART));
+                    if (i + openingSecondPartTag.Length >= markdown.Length || 
+                        markdown.Substring(i + 1, openingSecondPartTag.Length) != openingSecondPartTag)
+                        return false;
+                    return IsHyperlinkSecondPart(markdown, i + closingTag.Length + openingSecondPartTag.Length);
+                }
             return false;
         }
 
@@ -101,10 +108,10 @@ namespace Markdown.MarkdownEnumerable
         /// </summary>
         /// <param name="position">Position after "](" symbols</param>
         /// <returns></returns>
-        private static bool IsHyperlinkMiddle(string markdown, int position)
+        private static bool IsHyperlinkSecondPart(string markdown, int position)
         {
             var builder = new StringBuilder();
-            var endRepresentation = GetHyperlinkRepresentation(TagType.Closing);
+            var endRepresentation = GetHyperlinkRepresentation(new TagType(TagPosition.Closing, HyperlinkTagConstants.LINK_PART));
             for (var i = position; i <= markdown.Length - endRepresentation.Length; ++i)
             {
                 if (markdown.Substring(i, endRepresentation.Length) == endRepresentation)
@@ -112,23 +119,21 @@ namespace Markdown.MarkdownEnumerable
                 else
                     builder.Append(markdown[i]);
             }
-            return IsCorrectLink(builder.ToString()); // if not closed - we close it in the end
+            return false;
         }
 
 
 
-        private static string GetHyperlinkRepresentation(TagType type)
+        private static string GetHyperlinkRepresentation(TagType tagType)
         {
-            switch (type)
+            switch (tagType.TagPosition)
             {
-                case TagType.Opening:
-                    return "[";
-                case TagType.Middle:
-                    return "](";
-                case TagType.Closing:
-                    return ")";
+                case TagPosition.Opening:
+                    return tagType.TagPart == HyperlinkTagConstants.VALUE_PART ? "[" : "(";
+                case TagPosition.Closing:
+                    return tagType.TagPart == HyperlinkTagConstants.VALUE_PART ? "]" : ")";
                 default:
-                    throw new ArgumentException($"Unknown tag type:{type}");
+                    throw new ArgumentException($"Unknown tag type:{tagType.TagPosition}");
             }
         }
 
@@ -138,23 +143,23 @@ namespace Markdown.MarkdownEnumerable
             if (IsAnySymbolAtAnyPosition(markdown, positionsBeforeAndAfter, Underscore + Digits))
                 return false;
 
-            return AreGoodPositionsForTag(tagInfo.TagType, markdown, positionBefore, positionAfter);
+            return AreGoodPositionsForTag(tagInfo.TagPosition, markdown, positionBefore, positionAfter);
         }
 
-        private static bool AreGoodPositionsForTag(TagType tagType, string markdown, int positionBefore, int positionAfter)
+        private static bool AreGoodPositionsForTag(TagPosition tagPosition, string markdown, int positionBefore, int positionAfter)
         {
-            if (tagType == TagType.None)
+            if (tagPosition == TagPosition.None)
                 return false;
 
-            if (tagType == TagType.Opening)
+            if (tagPosition == TagPosition.Opening)
             {
                 var correctAtPositionBefore = IsPositionOutOfRange(markdown, positionBefore) || IsAnySymbolAtPosition(markdown, positionBefore, SpaceSymbols);
                 var correctAtPositionAfter = IsPositionOutOfRange(markdown, positionAfter) || IsNotAnySymbolAtPosition(markdown, positionAfter, SpaceSymbols);
                 return correctAtPositionBefore && correctAtPositionAfter;
             }
-            if (tagType == TagType.Closing)
-                return AreGoodPositionsForTag(TagType.Opening, markdown, positionAfter, positionBefore);
-            throw new ArgumentException($"Unknown tag type:{tagType}");
+            if (tagPosition == TagPosition.Closing)
+                return AreGoodPositionsForTag(TagPosition.Opening, markdown, positionAfter, positionBefore);
+            throw new ArgumentException($"Unknown tag type:{tagPosition}");
         }
 
         private static bool IsAnySymbolAtAnyPosition(string markdown, IEnumerable<int> positions, IEnumerable<char> symbols)

@@ -2,21 +2,27 @@
 using System.Collections.Generic;
 using System.Text;
 using Markdown.MarkdownEnumerable;
+using Markdown.MarkdownEnumerable.Tags;
 
 namespace Markdown.TagsRepresentation
 {
     internal class ParsedTag
     {
+        readonly Dictionary<Tag, string> htmlNames = new Dictionary<Tag, string>
+        {
+            { Tag.Italic, "em"},
+            { Tag.Strong, "strong"},
+            { Tag.Hyperlink, "a"}
+        };
+
         private readonly Dictionary<string, string> properties = new Dictionary<string, string>();
-        private readonly ITagsRepresentation representation;
 
         public readonly Tag Tag;
         public string Value;
 
-        public ParsedTag(Tag tag, ITagsRepresentation representation)
+        public ParsedTag(Tag tag)
         {
             Tag = tag;
-            this.representation = representation;
         }
 
         public void AddProperty(string propertyName, string value)
@@ -29,7 +35,7 @@ namespace Markdown.TagsRepresentation
             var collectedValue = valueOrProperty;
             if (Tag == Tag.Hyperlink)
             {
-                if (tagType == TagType.Opening)
+                if (tagType.TagPart == HyperlinkTagConstants.VALUE_PART)
                     Value = collectedValue;
                 else
                 {
@@ -61,18 +67,10 @@ namespace Markdown.TagsRepresentation
         public string GetCurrentRepresentation()
         {
             var builder = new StringBuilder();
-            builder.Append(representation.GetRepresentation(new TagInfo(Tag, TagType.Opening)));
+            builder.AppendFormat("<{0}", htmlNames[Tag]);
             foreach (var property in properties)
-            {
-                builder.Append(' ');
-                builder.Append(property.Key);
-                builder.Append("=\"");
-                builder.Append(property.Value);
-                builder.Append("\"");
-            }
-            builder.Append(representation.GetRepresentation(new TagInfo(Tag, TagType.Middle)));
-            builder.Append(Value);
-            builder.Append(representation.GetRepresentation(new TagInfo(Tag, TagType.Closing)));
+                builder.AppendFormat(" {0}=\"{1}\"", property.Key, property.Value);
+            builder.AppendFormat(">{0}</{1}>", Value, htmlNames[Tag]);
             return builder.ToString();
         }
     }

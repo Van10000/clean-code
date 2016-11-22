@@ -30,6 +30,7 @@ namespace MarkdownTests
         [TestCase("[abc]( _b_ c)", ExpectedResult = "[abc]( <em>b</em> c)", TestName = "Tag inside incorrect link in hyperlink")]
         [TestCase("[ab _c]( d_ e)", ExpectedResult = "[ab <em>c]( d</em> e)", TestName = "Tag inside incorrect text and link in hyperlink")]
         [TestCase("[abc](ya.\nru)", ExpectedResult = "[abc](ya.\nru)", TestName = "Line translation inside link")]
+        [TestCase("[a]b(c)", ExpectedResult = "[a]b(c)", TestName = "Symbol between hyperlink tags")]
         public string RenderToHtml(string markdown)
         {
             var htmlResult = MarkdownRenderer.RenderToHtml(markdown);
@@ -40,7 +41,7 @@ namespace MarkdownTests
         [TestCase("[abc](/doc.txt)", "C:/documents/", ExpectedResult = "<a href=\"C:/documents/doc.txt\">abc</a>")]
         public string RenderHyperlinksWithRelativePaths(string markdown, string baseUrl)
         {
-            var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), new HtmlTagsRepresentation(), baseUrl);
+            var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), baseUrl);
 
             return renderer.RenderToHtml();
         }
@@ -49,7 +50,7 @@ namespace MarkdownTests
             ExpectedResult = "<em class=\"a.css\">a</em> <strong class=\"a.css\">b</strong> <a href=\"d.ru\" class=\"a.css\">c</a>")]
         public string RenderToHtmlWithCssClass(string markdown, string className)
         {
-            var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), new HtmlTagsRepresentation(), cssClass: className);
+            var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), cssClass: className);
 
             return renderer.RenderToHtml();
         }

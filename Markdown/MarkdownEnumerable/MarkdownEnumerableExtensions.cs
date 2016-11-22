@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Markdown.MarkdownEnumerable.Tags;
 
 namespace Markdown.MarkdownEnumerable
 {
@@ -9,7 +10,9 @@ namespace Markdown.MarkdownEnumerable
         public static string ParseUntil(this IMarkdownEnumerable markdown, IEnumerable<TagInfo> tagInfos, out TagInfo stoppedAt)
         {
             var parsed = new StringBuilder();
-            var ignoredUselessTags = tagInfos.Where(tagInfo => tagInfo.Tag != Tag.None && tagInfo.TagType != TagType.None).ToList();
+            var ignoredUselessTags = tagInfos
+                .Where(tagInfo => !tagInfo.IsNone())
+                .ToList();
             while (!markdown.IsFinished())
             {
                 var currentTag = markdown.GetNextTag(ignoredUselessTags);
@@ -21,7 +24,7 @@ namespace Markdown.MarkdownEnumerable
                 }
                 parsed.Append(markdown.GetNextChar());
             }
-            stoppedAt = new TagInfo(Tag.None, TagType.None); // if finish
+            stoppedAt = TagInfo.None; // if finish
             return parsed.ToString();
         }
 

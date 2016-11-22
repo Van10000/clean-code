@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Markdown.MarkdownEnumerable;
+using Markdown.MarkdownEnumerable.Tags;
 using NUnit.Framework;
 
 namespace MarkdownTests
@@ -17,44 +18,44 @@ namespace MarkdownTests
             markdown.GetNextChar().Should().Be('c');
         }
 
-        [TestCase("ab _d", Tag.Italic, TagType.Opening, 'd', TestName = "Italic opening tag")]
-        [TestCase("ab_ d", Tag.Italic, TagType.Closing, ' ', TestName = "Italic closing tag")]
-        [TestCase("__d", Tag.Strong, TagType.Opening, 'd', TestName = "Strong opening tag")]
-        public void ParseUntilMeetTag(string markdown, Tag tag, TagType tagType, char symbolAfterTag)
+        [TestCase("ab _d", Tag.Italic, TagPosition.Opening, 0, 'd', TestName = "Italic opening tag")]
+        [TestCase("ab_ d", Tag.Italic, TagPosition.Closing, 0, ' ', TestName = "Italic closing tag")]
+        [TestCase("__d", Tag.Strong, TagPosition.Opening, 0, 'd', TestName = "Strong opening tag")]
+        public void ParseUntilMeetTag(string markdown, Tag tag, TagPosition tagPosition, int tagPart, char symbolAfterTag)
         {
-            var markdownEnumerable = ParseUntil(markdown, tag, tagType);
+            var markdownEnumerable = ParseUntil(markdown, tag, new TagType(tagPosition, tagPart));
 
             markdownEnumerable.GetNextChar().Should().Be(symbolAfterTag);
         }
 
-        [TestCase("_a", Tag.None, TagType.Opening, TestName = "Tag is none")]
-        [TestCase("_a", Tag.Italic, TagType.None, TestName = "Tag type is none")]
-        [TestCase("__", Tag.Strong, TagType.Opening, TestName = "Tag is at the end")]
-        [TestCase("abcd", Tag.Italic, TagType.Opening, TestName = "No such tag")]
-        [TestCase("abcd __e", Tag.Strong, TagType.Closing, TestName = "Wrong tag type")]
-        public void ParseUntilEnd(string markdown, Tag tag, TagType tagType)
+        [TestCase("_a", Tag.None, TagPosition.Opening, 0, TestName = "Tag is none")]
+        [TestCase("_a", Tag.Italic, TagPosition.None, 0, TestName = "Tag position is none")]
+        [TestCase("__", Tag.Strong, TagPosition.Opening, 0, TestName = "Tag is at the end")]
+        [TestCase("abcd", Tag.Italic, TagPosition.Opening, 0, TestName = "No such tag")]
+        [TestCase("abcd __e", Tag.Strong, TagPosition.Closing, 0, TestName = "Wrong tag position")]
+        public void ParseUntilEnd(string markdown, Tag tag, TagPosition tagPosition, int tagPart)
         {
-            var markdownEnumerable = ParseUntil(markdown, tag, tagType);
+            var markdownEnumerable = ParseUntil(markdown, tag, new TagType(tagPosition, tagPart));
 
             markdownEnumerable.IsFinished().Should().BeTrue();
         }
 
-        [TestCase("a _b", Tag.Italic, TagType.Opening)]
-        public void IfStoppedAtTag_ReturnCorrectStoppedAt(string markdown, Tag tag, TagType tagType)
+        [TestCase("a _b", Tag.Italic, TagPosition.Opening, 0)]
+        public void IfStoppedAtTag_ReturnCorrectStoppedAt(string markdown, Tag tag, TagPosition tagPosition, int tagPart)
         {
-            var stoppedAt = ParseUntilGetStoppedAt(markdown, tag, tagType);
+            var stoppedAt = ParseUntilGetStoppedAt(markdown, tag, new TagType(tagPosition, tagPart));
 
             stoppedAt.Tag.Should().Be(tag);
-            stoppedAt.TagType.Should().Be(tagType);
+            stoppedAt.TagPosition.Should().Be(tagPosition);
         }
 
-        [TestCase("a_ b", Tag.Strong, TagType.Opening)]
-        public void IfFinished_ReturnNoneStoppedAt(string markdown, Tag tag, TagType tagType)
+        [TestCase("a_ b", Tag.Strong, TagPosition.Opening, 0)]
+        public void IfFinished_ReturnNoneStoppedAt(string markdown, Tag tag, TagPosition tagPosition, int tagPart)
         {
-            var stoppedAt = ParseUntilGetStoppedAt(markdown, tag, tagType);
+            var stoppedAt = ParseUntilGetStoppedAt(markdown, tag, new TagType(tagPosition, tagPart));
 
             stoppedAt.Tag.Should().Be(Tag.None);
-            stoppedAt.TagType.Should().Be(TagType.None);
+            stoppedAt.TagPosition.Should().Be(TagPosition.None);
         }
 
         [Test]
@@ -62,9 +63,9 @@ namespace MarkdownTests
         {
             var tags = new[]
             {
-                new TagInfo(Tag.Strong, TagType.Opening),
-                new TagInfo(Tag.Strong, TagType.Closing),
-                new TagInfo(Tag.Italic, TagType.Opening)
+                new TagInfo(Tag.Strong, TagPosition.Opening, 0),
+                new TagInfo(Tag.Strong, TagPosition.Closing, 0),
+                new TagInfo(Tag.Italic, TagPosition.Opening, 0)
             };
             var markdownEnumerable = new StringMarkdownEnumerable("a_ __b");
 
@@ -74,23 +75,23 @@ namespace MarkdownTests
             parsed.Should().Be("a_ ");
         }
 
-        private StringMarkdownEnumerable ParseUntil(string markdown, Tag tag, TagType tagType)
+        private StringMarkdownEnumerable ParseUntil(string markdown, Tag tag, TagType tagPosition)
         {
             TagInfo stoppedAt;
-            return ParseUntil(markdown, tag, tagType, out stoppedAt);
+            return ParseUntil(markdown, tag, tagPosition, out stoppedAt);
         }
 
-        private TagInfo ParseUntilGetStoppedAt(string markdown, Tag tag, TagType tagType)
+        private TagInfo ParseUntilGetStoppedAt(string markdown, Tag tag, TagType tagPosition)
         {
             TagInfo stoppedAt;
-            ParseUntil(markdown, tag, tagType, out stoppedAt);
+            ParseUntil(markdown, tag, tagPosition, out stoppedAt);
             return stoppedAt;
         }
 
-        private StringMarkdownEnumerable ParseUntil(string markdown, Tag tag, TagType tagType, out TagInfo stoppedAt)
+        private StringMarkdownEnumerable ParseUntil(string markdown, Tag tag, TagType tagPosition, out TagInfo stoppedAt)
         {
             var markdownEnumerable = new StringMarkdownEnumerable(markdown);
-            var tagInfo = new TagInfo(tag, tagType);
+            var tagInfo = new TagInfo(tag, tagPosition);
 
             markdownEnumerable.ParseUntil(new[] { tagInfo }, out stoppedAt);
 
