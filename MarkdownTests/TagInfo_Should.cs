@@ -42,7 +42,8 @@ namespace MarkdownTests
         public bool DetectOpeningTag(Tag tag, int tagPart, string str, int pos)
         {
             var tagInfo = TagInfo.Create(tag, new TagType(TagPosition.Opening, tagPart));
-            return tagInfo.Fits(str, pos);
+            int positionAfter;
+            return tagInfo.Fits(str, pos, out positionAfter);
         }
 
         [TestCase(Tag.Italic, 0, "c_", 1, ExpectedResult = true, TestName = "Simple italic closing tag")]
@@ -54,7 +55,8 @@ namespace MarkdownTests
         public bool DetectClosingTag(Tag tag, int tagPart, string str, int pos)
         {
             var tagInfo = TagInfo.Create(tag, new TagType(TagPosition.Closing, tagPart));
-            return tagInfo.Fits(str, pos);
+            int positionAfter;
+            return tagInfo.Fits(str, pos, out positionAfter);
         }
     }
 }

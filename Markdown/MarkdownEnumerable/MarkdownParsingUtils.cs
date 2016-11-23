@@ -11,6 +11,7 @@ namespace Markdown.MarkdownEnumerable
         public const string Digits = "0123456789";
         public const char Underscore = '_';
         public const string SpaceSymbols = " \n\r\u0009\u00a0\u2000\u2001";
+        public const string NextLineSymbols = "\n";
 
         public static string ToCorrectLink(string link)
         {

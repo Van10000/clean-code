@@ -60,7 +60,7 @@ namespace Markdown
                 var parsedPart = markdown.ParseUntil(stopTags, out stoppedAt);
                 currentBuilder.Append(parsedPart);
 
-                if (ShouldCloseTag(stoppedAt.TagPosition))
+                if (stoppedAt.ShouldClose())
                 {
                     CloseLowerLevelsOfTags(stoppedAt);
                     if (tagsStack.Count == 1)
@@ -119,11 +119,6 @@ namespace Markdown
             foreach (var tag in tagsInside[CurrentTagInfo])
                 yield return TagInfo.Create(tag, TagType.FirstOpeningTag);
             yield return CurrentTagInfo.GetOfNextType();
-        }
-
-        private bool ShouldCloseTag(TagPosition tagType)
-        {
-            return tagType == TagPosition.Closing || tagType == TagPosition.None; // none if markdown finished
         }
 
         private void ClearState()

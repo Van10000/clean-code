@@ -1,10 +1,11 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 namespace Markdown.MarkdownEnumerable.Tags
 {
     public abstract class TagInfo
     {
-        public static TagInfo None => Create(Tag.None, TagPosition.None, 0);
+        public static TagInfo None => new SimpleTagInfo(Tag.None, TagPosition.None);
 
         public readonly Tag Tag;
         public readonly TagType TagType;
@@ -12,13 +13,21 @@ namespace Markdown.MarkdownEnumerable.Tags
         public TagPosition TagPosition => TagType.TagPosition;
         public int TagPart => TagType.TagPart;
         public abstract int MaximalPossiblePartsCount { get; }
+
+        /// <summary>
+        /// If representation is ambiguous in subclass - method returns null.
+        /// </summary>
+        [CanBeNull]
         public abstract string GetRepresentation();
+
+        public virtual bool ShouldClose() => TagPosition == TagPosition.Closing || TagPosition == TagPosition.None;
 
         public bool IsOpening() => TagPosition == TagPosition.Opening;
         public bool IsClosing() => TagPosition == TagPosition.Closing;
         public bool IsNone() => this == None;
 
         public bool IsNotLastPartOfTag() => TagPart < MaximalPossiblePartsCount - 1;
+        
 
         protected TagInfo(Tag tag, TagPosition tagPosition, int tagPart)
         {
@@ -55,14 +64,16 @@ namespace Markdown.MarkdownEnumerable.Tags
             throw new InvalidOperationException("There is no next tag after closing tag.");
         }
 
-        public virtual bool Fits(string markdown, int position)
+        public virtual bool Fits(string markdown, int position, out int positionAfterEnd)
         {
+            positionAfterEnd = -1;
             if (Tag == Tag.None || TagPosition == TagPosition.None)
                 return false;
 
             var tagRepresentation = GetRepresentation();
+            positionAfterEnd = position + tagRepresentation.Length;
 
-            if (position + tagRepresentation.Length > markdown.Length)
+            if (positionAfterEnd > markdown.Length)
                 return false;
             return markdown.Substring(position, tagRepresentation.Length) == tagRepresentation;
         }

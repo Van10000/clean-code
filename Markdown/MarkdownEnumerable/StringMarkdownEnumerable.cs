@@ -20,10 +20,13 @@ namespace Markdown.MarkdownEnumerable
         public TagInfo GetNextTag(IEnumerable<TagInfo> possibleTags)
         {
             var possibleTagsList = possibleTags as IList<TagInfo> ?? possibleTags.ToList();
-            return possibleTagsList
-                .Where(tag => tag.Fits(markdown, currentPosition))
-                .FirstOrDefault(possibleTagsList.Contains) // possble to do it more efficiently, but doesn't matter here.
+            var positionAfterEnd = -1;
+            var result = possibleTagsList
+                .FirstOrDefault(tag => tag.Fits(markdown, currentPosition, out positionAfterEnd))
                 ?? TagInfo.None;
+            if (result != TagInfo.None)
+                currentPosition = positionAfterEnd;
+            return result;
         }
 
         public char GetNextChar()

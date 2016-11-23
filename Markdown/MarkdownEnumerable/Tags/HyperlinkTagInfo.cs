@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace Markdown.MarkdownEnumerable.Tags
 {
@@ -19,6 +20,7 @@ namespace Markdown.MarkdownEnumerable.Tags
         
         public override int MaximalPossiblePartsCount => 2;
 
+        [NotNull]
         public override string GetRepresentation() => Representation[TagType];
 
         public HyperlinkTagInfo(TagPosition tagPosition, int tagPart) : base(Tag.Hyperlink, tagPosition, tagPart)
@@ -29,9 +31,9 @@ namespace Markdown.MarkdownEnumerable.Tags
         {
         }
 
-        public override bool Fits(string markdown, int position)
+        public override bool Fits(string markdown, int position, out int positionAfterEnd)
         {
-            if (!base.Fits(markdown, position))
+            if (!base.Fits(markdown, position, out positionAfterEnd))
                 return false;
             if (TagType == new TagType(TagPosition.Opening, VALUE_PART))
                 return IsHyperlinkStart(markdown, position + GetRepresentation().Length);
@@ -45,12 +47,12 @@ namespace Markdown.MarkdownEnumerable.Tags
         /// <returns></returns>
         private static bool IsHyperlinkStart(string markdown, int position)
         {
-            var closingValuePart = new HyperlinkTagInfo(TagPosition.Closing, HyperlinkTagInfo.VALUE_PART);
+            var closingValuePart = new HyperlinkTagInfo(TagPosition.Closing, VALUE_PART);
             var closingRepr = closingValuePart.GetRepresentation();
             for (var i = position; i <= markdown.Length - closingRepr.Length; ++i)
                 if (markdown.Substring(i, closingRepr.Length) == closingRepr)
                 {
-                    var openingSecondPartRepr = closingValuePart.GetOfNextType().GetRepresentation();
+                    var openingSecondPartRepr = Representation[closingValuePart.GetOfNextType().TagType];
                     if (i + openingSecondPartRepr.Length >= markdown.Length ||
                         markdown.Substring(i + 1, openingSecondPartRepr.Length) != openingSecondPartRepr)
                         return false;
@@ -67,7 +69,7 @@ namespace Markdown.MarkdownEnumerable.Tags
         private static bool IsHyperlinkSecondPart(string markdown, int position)
         {
             var builder = new StringBuilder();
-            var endRepr = new HyperlinkTagInfo(TagPosition.Closing, HyperlinkTagInfo.LINK_PART).GetRepresentation();
+            var endRepr = new HyperlinkTagInfo(TagPosition.Closing, LINK_PART).GetRepresentation();
             for (var i = position; i <= markdown.Length - endRepr.Length; ++i)
             {
                 if (markdown.Substring(i, endRepr.Length) == endRepr)

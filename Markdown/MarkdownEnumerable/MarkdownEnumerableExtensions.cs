@@ -18,7 +18,6 @@ namespace Markdown.MarkdownEnumerable
                 var currentTag = markdown.GetNextTag(ignoredUselessTags);
                 if (!currentTag.IsNone())
                 {
-                    markdown.SkipTag(currentTag);
                     stoppedAt = currentTag;
                     return parsed.ToString();
                 }
@@ -32,11 +31,6 @@ namespace Markdown.MarkdownEnumerable
         {
             for (int i = 0; i < positionsNumber; ++i)
                 markdown.GetNextChar();
-        }
-
-        private static void SkipTag(this IMarkdownEnumerable markdown, TagInfo tagInfo)
-        {
-            markdown.SkipCharacters(tagInfo.GetRepresentation().Length);
         }
     }
 }

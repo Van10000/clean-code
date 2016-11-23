@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace Markdown.MarkdownEnumerable.Tags
 {
@@ -8,6 +9,7 @@ namespace Markdown.MarkdownEnumerable.Tags
     {
         public override int MaximalPossiblePartsCount => 1;
 
+        [NotNull]
         public override string GetRepresentation()
         {
             switch (Tag)
@@ -29,9 +31,9 @@ namespace Markdown.MarkdownEnumerable.Tags
                 throw new ArgumentException($"Tag should be simple. {tag} is not a simple tag.");
         }
 
-        public override bool Fits(string markdown, int position)
+        public override bool Fits(string markdown, int position, out int positionAfterEnd)
         {
-            if (!base.Fits(markdown, position))
+            if (!base.Fits(markdown, position, out positionAfterEnd))
                 return false;
             var positionBefore = position - 1;
             var positionAfter = position + GetRepresentation().Length;
