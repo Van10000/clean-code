@@ -36,8 +36,7 @@ namespace Markdown.MarkdownEnumerable
 
         private static void SkipTag(this IMarkdownEnumerable markdown, TagInfo tagInfo)
         {
-            var tagRepresentation = MarkdownParsingUtils.GetTagRepresentation(tagInfo);
-            markdown.SkipCharacters(tagRepresentation.Length);
+            markdown.SkipCharacters(tagInfo.GetRepresentation().Length);
         }
     }
 }

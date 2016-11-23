@@ -12,6 +12,7 @@ namespace Markdown.MarkdownEnumerable.Tags
         public TagPosition TagPosition => TagType.TagPosition;
         public int TagPart => TagType.TagPart;
         public abstract int MaximalPossiblePartsCount { get; }
+        public abstract string GetRepresentation();
 
         public bool IsOpening() => TagPosition == TagPosition.Opening;
         public bool IsClosing() => TagPosition == TagPosition.Closing;
@@ -52,6 +53,18 @@ namespace Markdown.MarkdownEnumerable.Tags
             else if (TagPart < MaximalPossiblePartsCount - 1)
                 return Create(Tag, TagPosition.Opening, TagPart + 1);
             throw new InvalidOperationException("There is no next tag after closing tag.");
+        }
+
+        public virtual bool Fits(string markdown, int position)
+        {
+            if (Tag == Tag.None || TagPosition == TagPosition.None)
+                return false;
+
+            var tagRepresentation = GetRepresentation();
+
+            if (position + tagRepresentation.Length > markdown.Length)
+                return false;
+            return markdown.Substring(position, tagRepresentation.Length) == tagRepresentation;
         }
 
         protected bool Equals(TagInfo other)

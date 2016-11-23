@@ -21,7 +21,7 @@ namespace Markdown.MarkdownEnumerable
         {
             var possibleTagsList = possibleTags as IList<TagInfo> ?? possibleTags.ToList();
             return possibleTagsList
-                .Where(tag => MarkdownParsingUtils.IsCorrectTag(tag, markdown, currentPosition))
+                .Where(tag => tag.Fits(markdown, currentPosition))
                 .FirstOrDefault(possibleTagsList.Contains) // possble to do it more efficiently, but doesn't matter here.
                 ?? TagInfo.None;
         }
