@@ -31,24 +31,38 @@ namespace MarkdownTests
         [TestCase("[ab _c]( d_ e)", ExpectedResult = "[ab <em>c]( d</em> e)", TestName = "Tag inside incorrect text and link in hyperlink")]
         [TestCase("[abc](ya.\nru)", ExpectedResult = "[abc](ya.\nru)", TestName = "Line translation inside link")]
         [TestCase("[a]b(c)", ExpectedResult = "[a]b(c)", TestName = "Symbol between hyperlink tags")]
-        public string RenderToHtml(string markdown)
+        public string RenderToHtml_WithoutParagraphs(string markdown)
         {
             var htmlResult = MarkdownRenderer.RenderToHtml(markdown);
 
-            return htmlResult;
+            return RemoveParagraphs(htmlResult);
+        }
+
+        [TestCase("", ExpectedResult = "", TestName = "Empty string does not contain paragraph")]
+        [TestCase("abc", ExpectedResult = "<p>abc</p>", TestName = "Simple single paragraph")]
+        [TestCase("abc\n\ndef", ExpectedResult = "<p>abc</p><p>def</p>", TestName = "Two simple paragraphs")]
+        [TestCase("abc\n\r  \n\u2000def", ExpectedResult = "<p>abc</p><p>def</p>", TestName = "Extra space symbols between paragraphs are ignored")]
+        [TestCase("abc\n\n\n\n\n\n\n\ndef", ExpectedResult = "<p>abc</p><p>def</p>", TestName = "Extra new line symbols are ignored")]
+        [TestCase("abc\ndef", ExpectedResult = "<p>abc\ndef</p>", TestName = "One new line symbol is not enough")]
+        [TestCase("abc\n\n\n", ExpectedResult = "<p>abc</p>", TestName = "Paragraph doesn't start at the end")]
+        [TestCase("\n abc", ExpectedResult = "<p>abc</p>", TestName = "White space symbols are ignored also at the beginning")]
+        [TestCase("abc\n\ndef\n\ng", ExpectedResult = "<p>abc</p><p>def</p><p>g</p>", TestName = "Three paragraphs")]
+        public string RenderToHtml(string markdown)
+        {
+            return MarkdownRenderer.RenderToHtml(markdown);
         }
 
         [TestCase("[abc](/doc.txt)", "C:/documents/", ExpectedResult = "<a href=\"C:/documents/doc.txt\">abc</a>")]
-        public string RenderHyperlinksWithRelativePaths(string markdown, string baseUrl)
+        public string RenderHyperlinks_WithRelativePaths_WithoutParagraphs(string markdown, string baseUrl)
         {
             var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), baseUrl);
 
-            return renderer.RenderToHtml();
+            return RemoveParagraphs(renderer.RenderToHtml());
         }
 
         [TestCase("_a_ __b__ [c](d.ru)", "a.css", 
-            ExpectedResult = "<em class=\"a.css\">a</em> <strong class=\"a.css\">b</strong> <a href=\"d.ru\" class=\"a.css\">c</a>")]
-        public string RenderToHtmlWithCssClass(string markdown, string className)
+            ExpectedResult = "<p class=\"a.css\"><em class=\"a.css\">a</em> <strong class=\"a.css\">b</strong> <a href=\"d.ru\" class=\"a.css\">c</a></p>")]
+        public string RenderToHtmlWithCssClass_WithoutParagraphs(string markdown, string className)
         {
             var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), cssClass: className);
 
@@ -89,6 +103,11 @@ namespace MarkdownTests
                     markdownBuilder.Append('a');
 
             MarkdownRenderer.RenderToHtml(markdownBuilder.ToString());
+        }
+
+        private static string RemoveParagraphs(string htmlPage)
+        {
+            return htmlPage.Replace("<p>", "").Replace("</p>", "");
         }
     }
 }

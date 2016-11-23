@@ -14,11 +14,12 @@ namespace Markdown
 
         private readonly Dictionary<TagInfo, Tag[]> tagsInside = new Dictionary<TagInfo, Tag[]>
         {
-            {TagInfo.None, new[] {Tag.Strong, Tag.Italic, Tag.Hyperlink}},
+            {TagInfo.None, new [] {Tag.Paragraph}},
             {new HyperlinkTagInfo(TagPosition.Opening, HyperlinkTagInfo.VALUE_PART), new[] {Tag.Strong, Tag.Italic}},
             {new HyperlinkTagInfo(TagPosition.Opening, HyperlinkTagInfo.LINK_PART), new Tag[0] },
             {new SimpleTagInfo(Tag.Italic, TagPosition.Opening), new Tag[0]},
-            {new SimpleTagInfo(Tag.Strong, TagPosition.Opening), new[] {Tag.Italic}}
+            {new SimpleTagInfo(Tag.Strong, TagPosition.Opening), new[] {Tag.Italic}},
+            {new ParagraphTagInfo(TagPosition.Opening), new[] {Tag.Strong, Tag.Italic, Tag.Hyperlink}  }
         };
 
         private readonly Stack<TagType> tagsStack = new Stack<TagType>();

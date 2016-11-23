@@ -19,6 +19,8 @@ namespace Markdown.MarkdownEnumerable
 
         public TagInfo GetNextTag(IEnumerable<TagInfo> possibleTags)
         {
+            if (IsFinished())
+                return TagInfo.None;
             var possibleTagsList = possibleTags as IList<TagInfo> ?? possibleTags.ToList();
             var positionAfterEnd = -1;
             var result = possibleTagsList

@@ -12,7 +12,8 @@ namespace Markdown.TagsRepresentation
         {
             { Tag.Italic, "em"},
             { Tag.Strong, "strong"},
-            { Tag.Hyperlink, "a"}
+            { Tag.Hyperlink, "a"},
+            { Tag.Paragraph, "p" }
         };
 
         private readonly Dictionary<string, string> properties = new Dictionary<string, string>();

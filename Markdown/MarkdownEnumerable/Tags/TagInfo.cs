@@ -48,9 +48,19 @@ namespace Markdown.MarkdownEnumerable.Tags
 
         public static TagInfo Create(Tag tag, TagType tagType)
         {
-            if (tag == Tag.Hyperlink)
-                return new HyperlinkTagInfo(tagType);
-            return new SimpleTagInfo(tag, tagType.TagPosition);
+            switch (tag)
+            {
+                case Tag.Hyperlink:
+                    return new HyperlinkTagInfo(tagType);
+                case Tag.Paragraph:
+                    return new ParagraphTagInfo(tagType.TagPosition);
+                case Tag.Italic:
+                case Tag.Strong:
+                case Tag.None:
+                    return new SimpleTagInfo(tag, tagType.TagPosition);
+                default:
+                    throw new ArgumentException($"Unknown tag:{tag}");
+            }
         }
 
         public TagInfo GetOfNextType()
