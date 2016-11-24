@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Markdown.MarkdownEnumerable.Tags;
 
 namespace Markdown.TagsRepresentation
@@ -20,9 +16,7 @@ namespace Markdown.TagsRepresentation
 
         public override void AddValueOrProperty(string valueOrProperty, TagType tagType, string baseUrl)
         {
-            if (valueOrProperty == "")
-                return;
-            throw new InvalidOperationException();
+            return;
         }
     }
 }

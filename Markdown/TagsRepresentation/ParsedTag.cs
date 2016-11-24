@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Markdown.MarkdownEnumerable;
+﻿using System.Collections.Generic;
 using Markdown.MarkdownEnumerable.Tags;
 
 namespace Markdown.TagsRepresentation

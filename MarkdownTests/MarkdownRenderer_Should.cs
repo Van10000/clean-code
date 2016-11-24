@@ -65,6 +65,7 @@ namespace MarkdownTests
 
         [TestCase("_a_ __b__ [c](d.ru)", "a.css", 
             ExpectedResult = "<p class=\"a.css\"><em class=\"a.css\">a</em> <strong class=\"a.css\">b</strong> <a href=\"d.ru\" class=\"a.css\">c</a></p>")]
+        [TestCase("a  \nb", "abc.css", ExpectedResult = "<p class=\"abc.css\">a<br>b</p>")]
         public string RenderToHtmlWithCssClass_WithoutParagraphs(string markdown, string className)
         {
             var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), cssClass: className);

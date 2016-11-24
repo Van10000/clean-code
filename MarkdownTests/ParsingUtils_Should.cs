@@ -1,5 +1,4 @@
 ﻿using Markdown.MarkdownEnumerable;
-using Markdown.MarkdownEnumerable.Tags;
 using NUnit.Framework;
 
 namespace MarkdownTests

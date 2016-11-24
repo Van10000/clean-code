@@ -1,5 +1,4 @@
 ﻿using FluentAssertions;
-using Markdown.MarkdownEnumerable;
 using Markdown.MarkdownEnumerable.Tags;
 using Markdown.TagsRepresentation;
 using NUnit.Framework;
