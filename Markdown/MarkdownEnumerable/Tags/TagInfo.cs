@@ -22,11 +22,13 @@ namespace Markdown.MarkdownEnumerable.Tags
 
         public virtual bool ShouldClose() => TagPosition == TagPosition.Closing || TagPosition == TagPosition.None;
 
+        public virtual bool IsSingle() => false;
+
         public bool IsOpening() => TagPosition == TagPosition.Opening;
         public bool IsClosing() => TagPosition == TagPosition.Closing;
         public bool IsNone() => this == None;
 
-        public bool IsNotLastPartOfTag() => TagPart < MaximalPossiblePartsCount - 1;
+        public virtual bool IsNotLastPartOfTag() => TagPart < MaximalPossiblePartsCount - 1;
         
 
         protected TagInfo(Tag tag, TagPosition tagPosition, int tagPart)
@@ -54,6 +56,8 @@ namespace Markdown.MarkdownEnumerable.Tags
                     return new HyperlinkTagInfo(tagType);
                 case Tag.Paragraph:
                     return new ParagraphTagInfo(tagType.TagPosition);
+                case Tag.NewLine:
+                    return new NewLineTagInfo();
                 case Tag.Italic:
                 case Tag.Strong:
                 case Tag.None:
@@ -63,7 +67,7 @@ namespace Markdown.MarkdownEnumerable.Tags
             }
         }
 
-        public TagInfo GetOfNextType()
+        public virtual TagInfo GetOfNextType()
         {
             if (IsNone())
                 return None;

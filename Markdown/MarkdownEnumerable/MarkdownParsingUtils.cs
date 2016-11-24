@@ -38,5 +38,13 @@ namespace Markdown.MarkdownEnumerable
             builder.Append(relativePath.FirstOrDefault() == '/' ? relativePath.Substring(1) : relativePath);
             return builder.ToString();
         }
+
+        public static int FindNextNotWhiteSpace(string markdown, int position)
+        {
+            for (var i = position; i < markdown.Length; ++i)
+                if (!char.IsWhiteSpace(markdown[i]))
+                    return i;
+            return markdown.Length;
+        }
     }
 }

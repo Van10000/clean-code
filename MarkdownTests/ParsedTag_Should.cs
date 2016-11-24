@@ -12,7 +12,7 @@ namespace MarkdownTests
         [TestCase("text", Tag.Hyperlink, ExpectedResult = "<a>text</a>", TestName = "Hyperlink tag without link")]
         public string ReturnCorrectRepresentation_WithNoProperties(string value, Tag tag)
         {
-            var parsedTag = new ParsedTag(tag);
+            var parsedTag = ParsedTag.Create(tag);
             parsedTag.Value = value;
             return parsedTag.GetCurrentRepresentation();
         }
@@ -20,7 +20,7 @@ namespace MarkdownTests
         [Test]
         public void ReturnCorrectHyperlinkRepresentation()
         {
-            var parsedTag = new ParsedTag(Tag.Hyperlink);
+            var parsedTag = ParsedTag.Create(Tag.Hyperlink);
             parsedTag.Value = "some_text";
             parsedTag.AddProperty("href", "ya.ru");
             var expectedResult = "<a href=\"ya.ru\">some_text</a>";

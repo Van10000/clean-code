@@ -2,7 +2,6 @@
 using System.Text;
 using Markdown;
 using Markdown.MarkdownEnumerable;
-using Markdown.TagsRepresentation;
 using NUnit.Framework;
 
 namespace MarkdownTests
@@ -31,6 +30,10 @@ namespace MarkdownTests
         [TestCase("[ab _c]( d_ e)", ExpectedResult = "[ab <em>c]( d</em> e)", TestName = "Tag inside incorrect text and link in hyperlink")]
         [TestCase("[abc](ya.\nru)", ExpectedResult = "[abc](ya.\nru)", TestName = "Line translation inside link")]
         [TestCase("[a]b(c)", ExpectedResult = "[a]b(c)", TestName = "Symbol between hyperlink tags")]
+        [TestCase("a  \nb", ExpectedResult = "a<br>b", TestName = "Simple new line tag")]
+        [TestCase("a \nb", ExpectedResult ="a \nb", TestName = "Need at least two white space symbols before new line")]
+        [TestCase("a \u0009 \u2000\nb", ExpectedResult = "a<br>b", TestName = "Different white space symbols")]
+        [TestCase("  \n", ExpectedResult = "", TestName = "White space symbols in the beginning are for paragraph")]
         public string RenderToHtml_WithoutParagraphs(string markdown)
         {
             var htmlResult = MarkdownRenderer.RenderToHtml(markdown);

@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MarkdownEnumerable\Tags\HyperlinkTagInfo.cs" />
+    <Compile Include="MarkdownEnumerable\Tags\NewLineTagInfo.cs" />
     <Compile Include="MarkdownEnumerable\Tags\ParagraphTagInfo.cs" />
     <Compile Include="MarkdownEnumerable\Tags\SimpleTagInfo.cs" />
     <Compile Include="MarkdownEnumerable\Tags\Tag.cs" />
@@ -77,12 +78,15 @@
     <Compile Include="MarkdownEnumerable\Tags\TagInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MarkdownEnumerable\MarkdownEnumerableExtensions.cs" />
+    <Compile Include="TagsRepresentation\HyperlinkParsedTag.cs" />
+    <Compile Include="TagsRepresentation\ParsedNewLineTag.cs" />
     <Compile Include="TagsRepresentation\ParsedTag.cs" />
     <Compile Include="MarkdownEnumerable\IMarkdownEnumerable.cs" />
     <Compile Include="MarkdownEnumerable\MarkdownParsingUtils.cs" />
     <Compile Include="MarkdownEnumerable\StringMarkdownEnumerable.cs" />
     <Compile Include="MarkdownRenderer.cs" />
     <Compile Include="MarkdownEnumerable\Tags\TagType.cs" />
+    <Compile Include="TagsRepresentation\SimpleParsedTag.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

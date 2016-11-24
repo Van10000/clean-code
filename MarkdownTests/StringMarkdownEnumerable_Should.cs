@@ -30,6 +30,7 @@ namespace MarkdownTests
         [TestCase(" __c__ ", 1, Tag.Strong, TagPosition.Opening, 0)]
         [TestCase("_", 0, Tag.Italic, TagPosition.Opening, 0)]
         [TestCase("asdb wer", 2, Tag.None, TagPosition.None, 0)]
+        [TestCase("abc  \nde", 3, Tag.NewLine, TagPosition.None, 0)]
         public void AtSpecifiedPosition_FindNextTag(string markdown, int position, Tag expectedTag, 
             TagPosition expectedPosition, int expectedPart)
         {
