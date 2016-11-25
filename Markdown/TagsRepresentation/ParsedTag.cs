@@ -15,16 +15,18 @@ namespace Markdown.TagsRepresentation
             Tag = tag;
         }
 
-        public static ParsedTag Create(Tag tag)
+        public static ParsedTag Create(TagInfo tag)
         {
-            switch (tag)
+            switch (tag.Tag)
             {
                 case Tag.NewLine:
                     return new ParsedNewLineTag();
                 case Tag.Hyperlink:
                     return new HyperlinkParsedTag();
+                case Tag.Header:
+                    return new HeaderParsedTag(tag as HeaderTagInfo);
                 default:
-                    return new SimpleParsedTag(tag);
+                    return new SimpleParsedTag(tag.Tag);
             }
         }
 

@@ -2,7 +2,7 @@
 
 namespace Markdown.MarkdownEnumerable.Tags
 {
-    class NewLineTagInfo : TagInfo
+    internal class NewLineTagInfo : TagInfo
     {
         public const int MinimalSpaceSymbolsNumberBeforeNewLine = 2;
 
@@ -22,12 +22,16 @@ namespace Markdown.MarkdownEnumerable.Tags
 
         public override TagInfo GetOfNextType() => None;
 
-        public override bool Fits(string markdown, int position, out int positionAfterEnd)
+        public override bool Fits(string markdown, int position, out int positionAfterEnd, TagInfo previousTag)
         {
-            positionAfterEnd = MarkdownParsingUtils.FindNextNotWhiteSpace(markdown, position);
+            positionAfterEnd = MarkdownParsingUtils.FindNextNotFitting(markdown, position, char.IsWhiteSpace);
             var symbolsBetween = markdown.Substring(position, positionAfterEnd - position);
-            return symbolsBetween.Count(MarkdownParsingUtils.NextLineSymbols.Contains) == 1 &&
-                   symbolsBetween.IndexOfAny(MarkdownParsingUtils.NextLineSymbols.ToCharArray()) >= MinimalSpaceSymbolsNumberBeforeNewLine;
+            var exactlyOneNewLine = symbolsBetween.Count(MarkdownParsingUtils.IsNextLineSymbol) == 1;
+            var nextLineSymbolPosition = symbolsBetween.IndexOfAny(MarkdownParsingUtils.NextLineSymbols.ToCharArray());
+            var enoughSpaces = (nextLineSymbolPosition >= MinimalSpaceSymbolsNumberBeforeNewLine) || (previousTag?.Tag == Tag.Header);
+            positionAfterEnd = position + nextLineSymbolPosition + 1;
+
+            return exactlyOneNewLine && enoughSpaces;
         }
     }
 }

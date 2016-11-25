@@ -1,9 +1,8 @@
-﻿using System;
-using Markdown.MarkdownEnumerable.Tags;
+﻿using Markdown.MarkdownEnumerable.Tags;
 
 namespace Markdown.TagsRepresentation
 {
-    class ParsedNewLineTag : ParsedTag
+    internal class ParsedNewLineTag : ParsedTag
     {
         public ParsedNewLineTag() : base(Tag.NewLine)
         {

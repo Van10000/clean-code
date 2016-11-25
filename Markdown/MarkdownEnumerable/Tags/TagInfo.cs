@@ -58,6 +58,8 @@ namespace Markdown.MarkdownEnumerable.Tags
                     return new ParagraphTagInfo(tagType.TagPosition);
                 case Tag.NewLine:
                     return new NewLineTagInfo();
+                case Tag.Header:
+                    return new HeaderTagInfo(tagType.TagPosition);
                 case Tag.Italic:
                 case Tag.Strong:
                 case Tag.None:
@@ -78,7 +80,7 @@ namespace Markdown.MarkdownEnumerable.Tags
             throw new InvalidOperationException("There is no next tag after closing tag.");
         }
 
-        public virtual bool Fits(string markdown, int position, out int positionAfterEnd)
+        public virtual bool Fits(string markdown, int position, out int positionAfterEnd, TagInfo previousTag = null)
         {
             positionAfterEnd = -1;
             if (Tag == Tag.None || TagPosition == TagPosition.None)

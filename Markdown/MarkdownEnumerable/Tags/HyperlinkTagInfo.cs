@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace Markdown.MarkdownEnumerable.Tags
 {
-    public class HyperlinkTagInfo : TagInfo
+    internal class HyperlinkTagInfo : TagInfo
     {
         public const int VALUE_PART = 0;
         public const int LINK_PART = 1;
@@ -30,7 +30,7 @@ namespace Markdown.MarkdownEnumerable.Tags
         {
         }
 
-        public override bool Fits(string markdown, int position, out int positionAfterEnd)
+        public override bool Fits(string markdown, int position, out int positionAfterEnd, TagInfo previousTag = null)
         {
             if (!base.Fits(markdown, position, out positionAfterEnd))
                 return false;

@@ -19,7 +19,8 @@ namespace Markdown
             {new HyperlinkTagInfo(TagPosition.Opening, HyperlinkTagInfo.LINK_PART), new Tag[0] },
             {new SimpleTagInfo(Tag.Italic, TagPosition.Opening), new [] {Tag.NewLine}},
             {new SimpleTagInfo(Tag.Strong, TagPosition.Opening), new[] {Tag.Italic, Tag.NewLine}},
-            {new ParagraphTagInfo(TagPosition.Opening), new[] {Tag.Strong, Tag.Italic, Tag.Hyperlink, Tag.NewLine} }
+            {new ParagraphTagInfo(TagPosition.Opening), new[] {Tag.Strong, Tag.Italic, Tag.Hyperlink, Tag.NewLine, Tag.Header} },
+            {new HeaderTagInfo(TagPosition.Opening), new[] {Tag.Strong, Tag.Italic, Tag.Hyperlink} }
         };
 
         private readonly Stack<TagType> tagsStack = new Stack<TagType>();
@@ -134,7 +135,7 @@ namespace Markdown
         private void PushTag(TagInfo tagInfo)
         {
             tagsStack.Push(tagInfo.TagType);
-            parsedTags.Push(ParsedTag.Create(tagInfo.Tag));
+            parsedTags.Push(ParsedTag.Create(tagInfo));
             renderedParts.Push(new StringBuilder());
         }
 

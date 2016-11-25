@@ -34,6 +34,17 @@ namespace MarkdownTests
         [TestCase("a \nb", ExpectedResult ="a \nb", TestName = "Need at least two white space symbols before new line")]
         [TestCase("a \u0009 \u2000\nb", ExpectedResult = "a<br>b", TestName = "Different white space symbols")]
         [TestCase("  \n", ExpectedResult = "", TestName = "White space symbols in the beginning are for paragraph")]
+        [TestCase("# abc", ExpectedResult = "<h1>abc</h1>", TestName = "Simple header")]
+        [TestCase("abc # def", ExpectedResult = "abc # def", TestName = "Header should be in the beginning of the line")]
+        [TestCase("  \r  #### \u0009ab\u2000  c    ", ExpectedResult = "<h4>ab\u2000  c</h4>", TestName = "White space handling")]
+        [TestCase("####### abc", ExpectedResult = "####### abc", TestName = "Too many # symbols")]
+        [TestCase("##", ExpectedResult = "<h2></h2>", TestName = "Empty header is possible")]
+        [TestCase("### some text\nnext line", ExpectedResult = "<h3>some text</h3><br>next line", 
+            TestName = "<br> appears even without 2 spaces in line with header")]
+        [TestCase("## abc ##", ExpectedResult = "<h2>abc</h2>", TestName = "Optionally close header tag")]
+        [TestCase("## abc ######\n## abc", ExpectedResult = "<h2>abc</h2><br><h2>abc</h2>", TestName = "Not necessary to close with the same number of sharps")]
+        [TestCase("## abc ## ## ### #", ExpectedResult = "<h2>abc ## ## ###</h2>", TestName = "Only count the last closing")]
+        [TestCase("##abc", ExpectedResult = "##abc", TestName = "Space after '#' is required")]
         public string RenderToHtml_WithoutParagraphs(string markdown)
         {
             var htmlResult = MarkdownRenderer.RenderToHtml(markdown);
@@ -50,6 +61,8 @@ namespace MarkdownTests
         [TestCase("abc\n\n\n", ExpectedResult = "<p>abc</p>", TestName = "Paragraph doesn't start at the end")]
         [TestCase("\n abc", ExpectedResult = "<p>abc</p>", TestName = "White space symbols are ignored also at the beginning")]
         [TestCase("abc\n\ndef\n\ng", ExpectedResult = "<p>abc</p><p>def</p><p>g</p>", TestName = "Three paragraphs")]
+        [TestCase("### def", ExpectedResult = "<p><h3>def</h3></p>", TestName = "Header inside paragraph")]
+        [TestCase("abc\n### def", ExpectedResult = "<p>abc</p><p><h3>def</h3></p>", TestName = "Header starts new paragraph")]
         public string RenderToHtml(string markdown)
         {
             return MarkdownRenderer.RenderToHtml(markdown);
@@ -65,15 +78,15 @@ namespace MarkdownTests
 
         [TestCase("_a_ __b__ [c](d.ru)", "a.css", 
             ExpectedResult = "<p class=\"a.css\"><em class=\"a.css\">a</em> <strong class=\"a.css\">b</strong> <a href=\"d.ru\" class=\"a.css\">c</a></p>")]
-        [TestCase("a  \nb", "abc.css", ExpectedResult = "<p class=\"abc.css\">a<br>b</p>")]
-        public string RenderToHtmlWithCssClass_WithoutParagraphs(string markdown, string className)
+        [TestCase("a  \nb", "abc.css", ExpectedResult = "<p class=\"abc.css\">a<br>b</p>", TestName = "<br> does not have css class")]
+        public string RenderToHtmlWithCssClass(string markdown, string className)
         {
             var renderer = new MarkdownRenderer(new StringMarkdownEnumerable(markdown), cssClass: className);
 
             return renderer.RenderToHtml();
         }
 
-        [Test, Timeout(1000)]
+        [Test, Timeout(2000)]
         public void RenderFast_RandomString()
         {
             var charsCount = (int)1e5;
@@ -93,7 +106,7 @@ namespace MarkdownTests
             MarkdownRenderer.RenderToHtml(markdownBuilder.ToString());
         }
 
-        [Test, Timeout(2000)]
+        [Test, Timeout(3000)]
         public void RenderFast_TenBigHighlights()
         {
             var charsCount = (int)1e5;

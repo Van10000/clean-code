@@ -7,6 +7,7 @@ namespace Markdown.MarkdownEnumerable
 {
     public class StringMarkdownEnumerable : IMarkdownEnumerable
     {
+        public TagInfo PreviousTagInfo;
         private readonly string markdown;
 
         private int currentPosition;
@@ -15,6 +16,7 @@ namespace Markdown.MarkdownEnumerable
         {
             this.markdown = markdown;
             currentPosition = 0;
+            PreviousTagInfo = TagInfo.None;
         }
 
         public TagInfo GetNextTag(IEnumerable<TagInfo> possibleTags)
@@ -24,10 +26,11 @@ namespace Markdown.MarkdownEnumerable
             var possibleTagsList = possibleTags as IList<TagInfo> ?? possibleTags.ToList();
             var positionAfterEnd = -1;
             var result = possibleTagsList
-                .FirstOrDefault(tag => tag.Fits(markdown, currentPosition, out positionAfterEnd))
+                .FirstOrDefault(tag => tag.Fits(markdown, currentPosition, out positionAfterEnd, PreviousTagInfo))
                 ?? TagInfo.None;
             if (result != TagInfo.None)
                 currentPosition = positionAfterEnd;
+            PreviousTagInfo = result;
             return result;
         }
 
@@ -38,6 +41,7 @@ namespace Markdown.MarkdownEnumerable
             if (markdown[currentPosition] == '\\')
                 currentPosition++;
             currentPosition++;
+            PreviousTagInfo = null;
             return markdown[currentPosition - 1];
         }
 

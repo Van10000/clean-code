@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace Markdown.MarkdownEnumerable.Tags
 {
-    class SimpleTagInfo : TagInfo
+    internal class SimpleTagInfo : TagInfo
     {
         public override int MaximalPossiblePartsCount => 1;
 
@@ -31,7 +31,7 @@ namespace Markdown.MarkdownEnumerable.Tags
                 throw new ArgumentException($"Tag should be simple. {tag} is not a simple tag.");
         }
 
-        public override bool Fits(string markdown, int position, out int positionAfterEnd)
+        public override bool Fits(string markdown, int position, out int positionAfterEnd, TagInfo previousTag = null)
         {
             if (!base.Fits(markdown, position, out positionAfterEnd))
                 return false;

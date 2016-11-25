@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 
 namespace Markdown.MarkdownEnumerable
@@ -9,6 +10,13 @@ namespace Markdown.MarkdownEnumerable
         public const char Underscore = '_';
         public const string SpaceSymbols = " \n\r\u0009\u00a0\u2000\u2001";
         public const string NextLineSymbols = "\n";
+
+        public static bool IsNextLineSymbol(char c) => NextLineSymbols.Contains(c);
+
+        public static bool IsWhiteSpaceAndNotNextLineSymbol(char c) => char.IsWhiteSpace(c) && !IsNextLineSymbol(c);
+
+        public static bool IsEndOfLine(string markdown, int position)
+            => position >= markdown.Length || IsNextLineSymbol(markdown[position]);
 
         public static string ToCorrectLink(string link)
         {
@@ -36,12 +44,20 @@ namespace Markdown.MarkdownEnumerable
             return builder.ToString();
         }
 
-        public static int FindNextNotWhiteSpace(string markdown, int position)
+        public static int FindNextNotFitting(string markdown, int position, Predicate<char> predicate)
         {
             for (var i = position; i < markdown.Length; ++i)
-                if (!char.IsWhiteSpace(markdown[i]))
+                if (!predicate(markdown[i]))
                     return i;
             return markdown.Length;
+        }
+
+        public static int FindPreviousNotFitting(string markdown, int position, Predicate<char> predicate)
+        {
+            for (var i = position; i >= 0; --i)
+                if (!predicate(markdown[i]))
+                    return i;
+            return -1;
         }
     }
 }

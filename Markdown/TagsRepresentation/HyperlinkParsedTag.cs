@@ -4,11 +4,13 @@ using Markdown.MarkdownEnumerable.Tags;
 
 namespace Markdown.TagsRepresentation
 {
-    class HyperlinkParsedTag : SimpleParsedTag
+    internal class HyperlinkParsedTag : SimpleParsedTag
     {
         public HyperlinkParsedTag() : base(Tag.Hyperlink)
         {
         }
+
+        protected override string GetHtmlTagName() => "a";
 
         public override void AddValueOrProperty(string valueOrProperty, TagType tagType, string baseUrl)
         {

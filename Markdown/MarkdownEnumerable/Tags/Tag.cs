@@ -2,6 +2,6 @@
 {
     public enum Tag
     {
-        None, Strong, Italic, Hyperlink, Paragraph, NewLine
+        None, Strong, Italic, Hyperlink, Paragraph, NewLine, Header
     }
 }

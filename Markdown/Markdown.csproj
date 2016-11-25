@@ -69,6 +69,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MarkdownEnumerable\Tags\HeaderTagInfo.cs" />
     <Compile Include="MarkdownEnumerable\Tags\HyperlinkTagInfo.cs" />
     <Compile Include="MarkdownEnumerable\Tags\NewLineTagInfo.cs" />
     <Compile Include="MarkdownEnumerable\Tags\ParagraphTagInfo.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="MarkdownEnumerable\Tags\TagInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MarkdownEnumerable\MarkdownEnumerableExtensions.cs" />
+    <Compile Include="TagsRepresentation\HeaderParsedTag.cs" />
     <Compile Include="TagsRepresentation\HyperlinkParsedTag.cs" />
     <Compile Include="TagsRepresentation\ParsedNewLineTag.cs" />
     <Compile Include="TagsRepresentation\ParsedTag.cs" />

@@ -34,6 +34,12 @@ namespace MarkdownTests
         [TestCase(Tag.Hyperlink, HyperlinkTagInfo.VALUE_PART, "[a](b)", 0, ExpectedResult = true, TestName = "Simple hyperlink start")]
         [TestCase(Tag.Hyperlink, HyperlinkTagInfo.LINK_PART, "(a)", 0, ExpectedResult = true, TestName = "Do not check correctness for not first tagType")]
         [TestCase(Tag.Hyperlink, HyperlinkTagInfo.LINK_PART, "abc", 0, ExpectedResult = false, TestName = "Still check correct representation")]
+        [TestCase(Tag.Header, 0, "### a", 0, ExpectedResult = true, TestName = "Simple header")]
+        [TestCase(Tag.Header, 0, "a \n # \u0009d \n", 4, ExpectedResult = true, TestName = "Header with extra white spaces.")]
+        [TestCase(Tag.Header, 0, "# #", 0, ExpectedResult = true, TestName = "Header for '#' string")]
+        [TestCase(Tag.Header, 0, " \n", 0, ExpectedResult = false, TestName = "No header")]
+        [TestCase(Tag.Header, 0, "####### abc", 0, ExpectedResult = false, TestName = "7 sharps is not header")]
+        [TestCase(Tag.Header, 0, "####a", 0, ExpectedResult = false, TestName = "Need white space between header and text")]
         public bool DetectOpeningTag(Tag tag, int tagPart, string str, int pos)
         {
             var tagInfo = TagInfo.Create(tag, new TagType(TagPosition.Opening, tagPart));
@@ -47,6 +53,8 @@ namespace MarkdownTests
         [TestCase(Tag.Italic, 0, "a_ b", 1, ExpectedResult = true, TestName = "Gap in another side")]
         [TestCase(Tag.Hyperlink, HyperlinkTagInfo.VALUE_PART, "[abc](de)", 4, ExpectedResult = true, TestName = "Simple closing bracket")]
         [TestCase(Tag.Hyperlink, HyperlinkTagInfo.LINK_PART, "[abc](de)", 8, ExpectedResult = true, TestName = "Simple closing parenthesis")]
+        [TestCase(Tag.Header, 0, "### abc    ", 7, ExpectedResult = true, TestName = "Header closing at the end of string")]
+        [TestCase(Tag.Header, 0, "### abc \n", 7, ExpectedResult = true, TestName = "Header closing at next line symbol")]
         public bool DetectClosingTag(Tag tag, int tagPart, string str, int pos)
         {
             var tagInfo = TagInfo.Create(tag, new TagType(TagPosition.Closing, tagPart));
