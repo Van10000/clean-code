@@ -36,13 +36,12 @@ namespace MarkdownTests
         [TestCase("  \n", ExpectedResult = "", TestName = "White space symbols in the beginning are for paragraph")]
         [TestCase("# abc", ExpectedResult = "<h1>abc</h1>", TestName = "Simple header")]
         [TestCase("abc # def", ExpectedResult = "abc # def", TestName = "Header should be in the beginning of the line")]
-        [TestCase("  \r  #### \u0009ab\u2000  c    ", ExpectedResult = "<h4>ab\u2000  c</h4>", TestName = "White space handling")]
         [TestCase("####### abc", ExpectedResult = "####### abc", TestName = "Too many # symbols")]
-        [TestCase("##", ExpectedResult = "<h2></h2>", TestName = "Empty header is possible")]
-        [TestCase("### some text\nnext line", ExpectedResult = "<h3>some text</h3><br>next line", 
-            TestName = "<br> appears even without 2 spaces in line with header")]
+        [TestCase("## ", ExpectedResult = "<h2></h2>", TestName = "Empty header is possible")]
+        [TestCase("### some text\nnext line", ExpectedResult = "<h3>some text</h3>next line", 
+            TestName = "Next line symbols disappear after header")]
         [TestCase("## abc ##", ExpectedResult = "<h2>abc</h2>", TestName = "Optionally close header tag")]
-        [TestCase("## abc ######\n## abc", ExpectedResult = "<h2>abc</h2><br><h2>abc</h2>", TestName = "Not necessary to close with the same number of sharps")]
+        [TestCase("## abc ######\n## abc", ExpectedResult = "<h2>abc</h2><h2>abc</h2>", TestName = "Not necessary to close with the same number of sharps")]
         [TestCase("## abc ## ## ### #", ExpectedResult = "<h2>abc ## ## ###</h2>", TestName = "Only count the last closing")]
         [TestCase("##abc", ExpectedResult = "##abc", TestName = "Space after '#' is required")]
         public string RenderToHtml_WithoutParagraphs(string markdown)
@@ -60,9 +59,11 @@ namespace MarkdownTests
         [TestCase("abc\ndef", ExpectedResult = "<p>abc\ndef</p>", TestName = "One new line symbol is not enough")]
         [TestCase("abc\n\n\n", ExpectedResult = "<p>abc</p>", TestName = "Paragraph doesn't start at the end")]
         [TestCase("\n abc", ExpectedResult = "<p>abc</p>", TestName = "White space symbols are ignored also at the beginning")]
+        [TestCase("\n\n\n", ExpectedResult = "<p></p>", TestName = "Empty paragraph is possible")]
         [TestCase("abc\n\ndef\n\ng", ExpectedResult = "<p>abc</p><p>def</p><p>g</p>", TestName = "Three paragraphs")]
-        [TestCase("### def", ExpectedResult = "<p><h3>def</h3></p>", TestName = "Header inside paragraph")]
-        [TestCase("abc\n### def", ExpectedResult = "<p>abc</p><p><h3>def</h3></p>", TestName = "Header starts new paragraph")]
+        [TestCase("### def", ExpectedResult = "<h3>def</h3>", TestName = "Header not inside paragraph")]
+        [TestCase("abc\n### def\nghi", ExpectedResult = "<p>abc</p><h3>def</h3><p>ghi</p>", TestName = "Header starts new paragraph")]
+        [TestCase(" \n \r \n #### \u0009ab\u2000  c  \n\n  ", ExpectedResult = "<p></p><h4>ab\u2000  c</h4>", TestName = "White space handling")]
         public string RenderToHtml(string markdown)
         {
             return MarkdownRenderer.RenderToHtml(markdown);

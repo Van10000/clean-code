@@ -1,4 +1,6 @@
 ﻿using System;
+using System.CodeDom;
+using System.Linq;
 
 namespace Markdown.MarkdownEnumerable.Tags
 {
@@ -28,43 +30,39 @@ namespace Markdown.MarkdownEnumerable.Tags
             positionAfterEnd = -1;
             if (TagPosition == TagPosition.Opening)
             {
-                var beforeStart = MarkdownParsingUtils.FindPreviousNotFitting(markdown, position - 1, 
-                    MarkdownParsingUtils.IsWhiteSpaceAndNotNextLineSymbol);
-                if (beforeStart != -1 && !MarkdownParsingUtils.IsNextLineSymbol(markdown[beforeStart]))
+                int afterWhiteSpaces;
+                if (IsEndOfLine(markdown, position, out afterWhiteSpaces))
                     return false;
-                var positionAfterWhiteSpaces = MarkdownParsingUtils.FindNextNotFitting(markdown, position, 
-                    MarkdownParsingUtils.IsWhiteSpaceAndNotNextLineSymbol);
-                if (MarkdownParsingUtils.IsEndOfLine(markdown, positionAfterWhiteSpaces))
+                var headerSymbolsEndPosition = MarkdownParsingUtils.FindNextNotFitting(markdown, afterWhiteSpaces, HeaderSymbol.Equals);
+                var headerSymbolsCount = headerSymbolsEndPosition - afterWhiteSpaces;
+                if (!IsInRangeNotStrict(headerSymbolsCount, 1, 6))
                     return false;
-                var headerSymbolsEndPosition = MarkdownParsingUtils.FindNextNotFitting(markdown, positionAfterWhiteSpaces, ch => ch == HeaderSymbol);
-                var headerSymbolsCount = headerSymbolsEndPosition - positionAfterWhiteSpaces;
-                if (headerSymbolsCount < 1 || headerSymbolsCount > 6)
-                    return false;
-                if (headerSymbolsEndPosition != markdown.Length && !char.IsWhiteSpace(markdown[headerSymbolsEndPosition]))
-                    return false;
-                positionAfterEnd = MarkdownParsingUtils.FindNextNotFitting(markdown, headerSymbolsEndPosition, 
-                    MarkdownParsingUtils.IsWhiteSpaceAndNotNextLineSymbol);
+                positionAfterEnd = MarkdownParsingUtils.FindNextNotFitting(markdown, headerSymbolsEndPosition, char.IsWhiteSpace);
+                if (positionAfterEnd == headerSymbolsEndPosition)
+                    return false; // need at least one white space
                 HeaderLevel = headerSymbolsCount;
                 return true;
             }
             else
             {
-                var positionAfterWhiteSpaces = MarkdownParsingUtils.FindNextNotFitting(markdown, position,
-                    MarkdownParsingUtils.IsWhiteSpaceAndNotNextLineSymbol);
-                if (MarkdownParsingUtils.IsEndOfLine(markdown, positionAfterWhiteSpaces))
-                {
-                    positionAfterEnd = positionAfterWhiteSpaces;
+                if (IsEndOfLine(markdown, position, out positionAfterEnd))
                     return true;
-                }
-                if (markdown[positionAfterWhiteSpaces] != HeaderSymbol)
+                if (markdown[positionAfterEnd] != HeaderSymbol)
                     return false;
-                var positionAfterHeaderSymbols = MarkdownParsingUtils.FindNextNotFitting(markdown,
-                    positionAfterWhiteSpaces,
-                    ch => ch == HeaderSymbol);
-                positionAfterEnd = MarkdownParsingUtils.FindNextNotFitting(markdown, positionAfterHeaderSymbols,
-                    MarkdownParsingUtils.IsWhiteSpaceAndNotNextLineSymbol);
-                return MarkdownParsingUtils.IsEndOfLine(markdown, positionAfterEnd);
+                var positionAfterHeaderSymbols = MarkdownParsingUtils.FindNextNotFitting(markdown, 
+                    positionAfterEnd, HeaderSymbol.Equals);
+                return IsEndOfLine(markdown, positionAfterHeaderSymbols, out positionAfterEnd);
             }
         }
+
+        private static bool IsEndOfLine(string markdown, int position, out int positionAfterEnd)
+        {
+            positionAfterEnd = MarkdownParsingUtils.FindNextNotFitting(markdown, position, char.IsWhiteSpace);
+            var endTagSubstr = markdown.Substring(position, positionAfterEnd - position);
+            return endTagSubstr.Any(MarkdownParsingUtils.IsNextLineSymbol) || positionAfterEnd == markdown.Length;
+        }
+
+        private static bool IsInRangeNotStrict(int value, int leftBound, int rightBound)
+            => leftBound <= value && value <= rightBound;
     }
 }

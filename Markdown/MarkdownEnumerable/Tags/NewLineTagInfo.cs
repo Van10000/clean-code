@@ -28,7 +28,7 @@ namespace Markdown.MarkdownEnumerable.Tags
             var symbolsBetween = markdown.Substring(position, positionAfterEnd - position);
             var exactlyOneNewLine = symbolsBetween.Count(MarkdownParsingUtils.IsNextLineSymbol) == 1;
             var nextLineSymbolPosition = symbolsBetween.IndexOfAny(MarkdownParsingUtils.NextLineSymbols.ToCharArray());
-            var enoughSpaces = (nextLineSymbolPosition >= MinimalSpaceSymbolsNumberBeforeNewLine) || (previousTag?.Tag == Tag.Header);
+            var enoughSpaces = nextLineSymbolPosition >= MinimalSpaceSymbolsNumberBeforeNewLine;
             positionAfterEnd = position + nextLineSymbolPosition + 1;
 
             return exactlyOneNewLine && enoughSpaces;

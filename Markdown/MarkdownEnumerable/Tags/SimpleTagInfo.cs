@@ -52,8 +52,8 @@ namespace Markdown.MarkdownEnumerable.Tags
 
             if (tagPosition == TagPosition.Opening)
             {
-                var correctAtPositionBefore = IsPositionOutOfRange(markdown, positionBefore) || IsAnySymbolAtPosition(markdown, positionBefore, MarkdownParsingUtils.SpaceSymbols);
-                var correctAtPositionAfter = IsPositionOutOfRange(markdown, positionAfter) || IsNotAnySymbolAtPosition(markdown, positionAfter, MarkdownParsingUtils.SpaceSymbols);
+                var correctAtPositionBefore = IsPositionOutOfRange(markdown, positionBefore) || char.IsWhiteSpace(markdown, positionBefore);
+                var correctAtPositionAfter = IsPositionOutOfRange(markdown, positionAfter) || !char.IsWhiteSpace(markdown, positionAfter);
                 return correctAtPositionBefore && correctAtPositionAfter;
             }
             if (tagPosition == TagPosition.Closing)
@@ -76,15 +76,6 @@ namespace Markdown.MarkdownEnumerable.Tags
             if (IsPositionOutOfRange(markdown, position))
                 return false;
             return markdown[position] == symbol;
-        }
-
-        private static bool IsNotAnySymbolAtPosition(string markdown, int position, IEnumerable<char> symbols) => symbols.All(symbol => IsNotSymbolAtPosition(markdown, position, symbol));
-
-        private static bool IsNotSymbolAtPosition(string markdown, int position, char symbol)
-        {
-            if (IsPositionOutOfRange(markdown, position))
-                return true;
-            return markdown[position] != symbol;
         }
 
         private static bool IsPositionOutOfRange(string markdown, int position)
